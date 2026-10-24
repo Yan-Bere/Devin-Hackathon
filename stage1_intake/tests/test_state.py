@@ -21,7 +21,7 @@ def test_set_field_converts_and_logs_original_units(tmp_path):
     assert session.fields["dp_hard_limit"].value == pytest.approx(27.579, abs=1e-3)
     assert session.fields["dp_hard_limit"].status == "user_provided"
     assert session.fields["dp_hard_limit"].source_quote == "four psi"
-    notes = (session.dir / "notes.txt").read_text()
+    notes = (session.dir / "notes.txt").read_text(encoding="utf-8")
     assert "(from 4 psi)" in notes
     assert 'quote="four psi"' in notes
 
@@ -112,7 +112,7 @@ def test_heat_source_side_effect_and_requirements_rewrite(tmp_path):
     assert session.set_field("heat_sources", schema.FIELD_BY_ID["heat_sources"].default).ok
     assert session.fields["total_power"].status == "default_proposed"
     assert session.fields["total_power"].value == pytest.approx(1492.8)
-    document = json.loads((session.dir / "requirements.json").read_text())
+    document = json.loads((session.dir / "requirements.json").read_text(encoding="utf-8"))
     assert document["fields"]["heat_sources"]["status"] == "user_provided"
     assert document["fields"]["total_power"]["value"] == pytest.approx(1492.8)
     assert set(document) == {
@@ -137,7 +137,7 @@ def test_finalize_incomplete_and_full_happy_path(tmp_path):
     assert session.acknowledge_warning("C5", "I acknowledge C5.").ok
     assert session.is_complete()
     assert session.finalize("finalize").ok
-    final_document = json.loads((session.dir / "requirements_final.json").read_text())
+    final_document = json.loads((session.dir / "requirements_final.json").read_text(encoding="utf-8"))
     assert final_document["finalized"] is True
     assert set(final_document["fields"]["dp_hard_limit"]) == {
         "value", "unit", "status", "source_quote", "updated_at", "required", "is_assumption", "group"

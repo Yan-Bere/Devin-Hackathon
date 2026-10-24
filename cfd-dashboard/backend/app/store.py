@@ -18,6 +18,7 @@ class RunStore:
     def _fingerprint(self, case_dir: Path) -> tuple:
         paths = [
             case_dir / "params.json",
+            case_dir / "model_result.json",
             case_dir / "system" / "controlDict",
             *case_dir.glob("log.*"),
             *(case_dir / "constant" / "triSurface").glob("*.stl"),

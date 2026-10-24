@@ -401,8 +401,28 @@ async function refreshModal(loadGeometry) {
     ["Finished", run.finished_at ? new Date(run.finished_at).toLocaleString() : "–"],
   ].map(([k, v]) => `<tr><td>${k}</td><td>${esc(v)}</td></tr>`).join("");
 
-  Plotly.react("modal-residual-plot", residualTraces(run.residuals),
-    residualLayout(run.residuals?.iterations?.length ? "" : "No residual data"), { displayModeBar: false, responsive: true });
+  const det = run.details || {};
+  if (det.source === "stage3-reduced-order-model") {
+    Plotly.react("modal-residual-plot", [],
+      residualLayout("Reduced-order model — no solver residuals"),
+      { displayModeBar: false, responsive: true });
+    const fnum = (v) => v == null ? "–" : Number(v).toFixed(1);
+    $("modal-compare").innerHTML =
+      `<div class="rom-details">` +
+      `<div class="metric"><div class="label">GPU max (hottest)</div><div class="value">${fnum(det.gpu_max_c)} °C <span class="sub">${esc(det.gpu_hottest || "")}</span></div></div>` +
+      `<div class="metric"><div class="label">HBM max (hottest)</div><div class="value">${fnum(det.hbm_max_c)} °C <span class="sub">${esc(det.hbm_hottest || "")}</span></div></div>` +
+      `<div class="metric"><div class="label">Coolant rise</div><div class="value">${fnum(det.coolant_rise_k)} K</div></div>` +
+      `<div class="metric"><div class="label">Feasible</div><div class="value">${det.feasible === false ? "No" : det.feasible === true ? "Yes" : "–"}</div></div>` +
+      (det.role ? `<div class="metric"><div class="label">Role</div><div class="value">${esc(det.role.replaceAll("_", " "))}</div></div>` : "") +
+      `</div>` +
+      ((det.violations || []).length ? `<div class="campaign-error">${det.violations.map((v) => esc(`${v.constraint || ""}:${v.component || ""} ${v.value}>${v.limit}`)).join("; ")}</div>` : "") +
+      `<div class="rom-files">` +
+      (det.files || []).map((n) => `<a href="/api/runs/${encodeURIComponent(run.id)}/files/${n}">${esc(n)}</a>`).join(" ") +
+      `</div>`;
+  } else {
+    Plotly.react("modal-residual-plot", residualTraces(run.residuals),
+      residualLayout(run.residuals?.iterations?.length ? "" : "No residual data"), { displayModeBar: false, responsive: true });
+  }
 
   if (loadGeometry) loadViewer(run);
 }
@@ -526,3 +546,99 @@ async function boot() {
   setInterval(() => { if (state.modalRunId && state.runs.get(state.modalRunId)?.status === "running") refreshModal(false); }, 3000);
 }
 boot();
+
+// ---- stage-3 modelling campaign ------------------------------------------
+const campaign = { data: null, timer: null };
+const STEP_LABELS = [
+  ["interpreting", "Interpreting requirements with Devin"],
+  ["generating", "Generating geometry"],
+  ["evaluating", "Simulating candidates"],
+  ["selecting", "Selecting designs"],
+  ["exporting", "Exporting CAD"],
+];
+
+async function pollCampaign() {
+  try {
+    const r = await fetch("/api/modelling/status");
+    campaign.data = await r.json();
+  } catch (e) { campaign.data = null; }
+  renderCampaign();
+  const s = campaign.data;
+  if (s && (s.status === "running" || s.status === "queued")) {
+    if (!campaign.timer) campaign.timer = setInterval(pollCampaign, 1000);
+  } else if (campaign.timer) {
+    clearInterval(campaign.timer); campaign.timer = null;
+  }
+}
+
+function renderCampaign() {
+  const bar = $("campaign-bar"), ov = $("campaign-overlay");
+  const s = campaign.data;
+  const hasRuns = [...state.runs.values()].some((r) => r.status === "completed");
+  if (!s || s.status === "idle") {
+    bar.classList.add("hidden"); ov.classList.add("hidden"); return;
+  }
+  bar.classList.remove("hidden");
+  $("campaign-mode").textContent = s.mode === "demo" ? s.demo_note : "Live computation";
+  $("campaign-stage").textContent = s.stage ? `${s.stage} — ${s.message || ""}` : "";
+  $("campaign-fill").style.width = `${Math.round((s.progress || 0) * 100)}%`;
+  const it = s.interpretation || {};
+  let devin = "";
+  if (it.provider_label) {
+    devin = `Requirements interpreted by ${it.provider_label}`;
+    if (it.session_url) devin = `<a href="${it.session_url}" target="_blank" rel="noreferrer">Requirements interpreted by Devin</a>`;
+    if (it.cached) devin += " (cached)";
+    if (s.mode === "demo") devin += " · replayed";
+  }
+  $("campaign-devin").innerHTML = devin;
+  $("campaign-label").textContent = s.label || "";
+  $("campaign-error").textContent = s.error || "";
+  bar.classList.toggle("failed", s.status === "failed");
+  bar.classList.toggle("done", s.status === "completed");
+
+  // overlay only while active and no completed runs yet
+  const active = s.status === "running" || s.status === "queued";
+  if (active && !hasRuns) {
+    ov.classList.remove("hidden");
+    const steps = $("campaign-steps");
+    if (!steps.children.length) {
+      for (const [, label] of STEP_LABELS) {
+        const li = document.createElement("li");
+        li.textContent = label; steps.appendChild(li);
+      }
+    }
+    const cur = STEP_LABELS.findIndex(([k]) => k === s.stage);
+    [...steps.children].forEach((li, i) =>
+      li.classList.toggle("current", i === cur));
+  } else {
+    ov.classList.add("hidden");
+  }
+  // temperature label
+  const tl = s.temperature_label;
+  if (tl) {
+    { const w = document.querySelector("#stat-best-t-wrap .stat-label");
+      if (w) w.textContent = tl; }
+    const th = $("th-tmax"); if (th) th.textContent = tl;
+  }
+}
+
+// wrap the existing pareto render to add the selected-designs trace + label
+const _origRenderPareto = renderPareto;
+renderPareto = function () {
+  _origRenderPareto();
+  const sel = [...state.runs.values()].filter((r) => r.details && r.details.role);
+  if (!sel.length) return;
+  const tl = campaign.data && campaign.data.temperature_label;
+  Plotly.addTraces("pareto-plot", {
+    type: "scatter", mode: "markers+text", name: "selected designs",
+    x: sel.map((r) => r.metrics.pressure_drop_pa),
+    y: sel.map((r) => r.metrics.max_temperature_k),
+    text: sel.map((r) => r.details.role.replaceAll("_", " ")),
+    textposition: "top center",
+    customdata: sel.map((r) => r.id),
+    marker: { symbol: "diamond", size: 13, color: "#c0392b",
+              line: { color: "#222", width: 1 } },
+  });
+  if (tl) Plotly.relayout("pareto-plot", { "yaxis.title": tl });
+};
+pollCampaign();

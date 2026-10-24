@@ -36,7 +36,7 @@ logger = logging.getLogger("coldplate.parser")
 Provider = Literal["devin", "recorded", "manual"]
 ParseStatus = Literal["ok", "needs_input", "failed", "unsupported"]
 
-DEFAULT_CACHE_DIR = Path("runs/cache/parse")
+DEFAULT_CACHE_DIR = Path(__file__).resolve().parent.parent / "runs" / "cache" / "parse"
 
 PROVIDER_LABELS = {
     "devin": "Devin API session (live interpretation)",

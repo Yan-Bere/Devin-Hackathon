@@ -24,6 +24,7 @@ class Run:
     error: str | None
     has_geometry: bool
     residuals: dict = field(default_factory=lambda: {"iterations": [], "fields": {}})
+    details: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -43,6 +44,7 @@ class Run:
             "on_pareto": self.on_pareto,
             "error": self.error,
             "has_geometry": self.has_geometry,
+            "details": self.details,
         }
 
 
@@ -244,6 +246,37 @@ def parse_case(case_dir: Path, cfg) -> Run:
     run_id = case_dir.name
     index_match = re.search(r"(\d+)$", run_id)
     index = int(index_match.group(1)) if index_match else 0
+    mr_path = case_dir / "model_result.json"
+    if mr_path.is_file():
+        try:
+            mr = json.loads(mr_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            mr = None
+        if isinstance(mr, dict):
+            geom = case_dir / "constant" / "triSurface"
+            met = mr.get("metrics") or {}
+            return Run(
+                id=run_id, index=index, status=mr.get("status", "completed"),
+                params=mr.get("params") or {}, metrics=met,
+                solver="stage-3 reduced-order model",
+                mesh_cells=None, iteration=None, end_iteration=None,
+                started_at=mr.get("started_at"), finished_at=mr.get("finished_at"),
+                runtime_s=None, converged=None, on_pareto=False,
+                error=mr.get("error"),
+                has_geometry=geom.is_dir() and any(geom.glob("*.stl")),
+                residuals={"iterations": [], "fields": {}},
+                details={
+                    "label": mr.get("label"), "source": mr.get("source"),
+                    "role": mr.get("role"), "feasible": mr.get("feasible"),
+                    "violations": mr.get("violations") or [],
+                    "gpu_max_c": met.get("gpu_max_c"), "hbm_max_c": met.get("hbm_max_c"),
+                    "hbm_hottest": met.get("hbm_hottest"), "gpu_hottest": met.get("gpu_hottest"),
+                    "coolant_rise_k": met.get("coolant_rise_k"),
+                    "candidate_id": mr.get("candidate_id"), "design_id": mr.get("design_id"),
+                    "files": [n for n in ("design.step", "preview.glb", "model_result.json")
+                              if (case_dir / n).exists()],
+                },
+            )
     params = {}
     params_path = case_dir / "params.json"
     try:

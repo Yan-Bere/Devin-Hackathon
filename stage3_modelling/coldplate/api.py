@@ -22,7 +22,10 @@ from coldplate import __version__ as ENGINE_VERSION
 from coldplate.jobs import JobManager
 from coldplate.results_models import ResultsDoc
 
-RUNS_DIR = Path(os.environ.get("COLDPLATE_RUNS_DIR", "runs"))
+RUNS_DIR = Path(os.environ.get(
+    "COLDPLATE_RUNS_DIR",
+    str(Path(__file__).resolve().parent.parent / "runs"),
+))
 jobs = JobManager(RUNS_DIR)
 
 app = FastAPI(title="coldplate-engine")

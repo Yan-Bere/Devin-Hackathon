@@ -149,3 +149,15 @@ main { padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 16px
   .grid { grid-template-columns: 1fr; }
   .modal-body { grid-template-columns: 1fr; }
 }
+/* stage-3 campaign */
+.campaign-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border,#ddd);font-size:.85rem}
+.campaign-bar.failed .campaign-stage{color:#c0392b}
+.campaign-bar.done .campaign-fill{background:#27ae60}
+.campaign-tag{padding:2px 8px;border-radius:4px;background:#eef3f7;border:1px solid #ccd}
+.campaign-error{color:#c0392b}
+.campaign-track{flex:1;min-width:120px;height:8px;background:#eee;border-radius:4px;overflow:hidden}
+.campaign-fill{height:100%;background:#2980b9;transition:width .3s}
+.campaign-overlay{position:absolute;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center}
+.card-pareto{position:relative}
+.campaign-steps li{opacity:.4}.campaign-steps li.current{opacity:1;font-weight:600}
+.campaign-devin a{color:inherit}

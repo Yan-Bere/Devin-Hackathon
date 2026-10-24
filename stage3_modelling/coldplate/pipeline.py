@@ -82,6 +82,9 @@ def run_job(
     options: dict,
     progress: Optional[Callable] = None,
     on_interpretation: Optional[Callable] = None,
+    on_candidate: Optional[Callable] = None,
+    on_selected: Optional[Callable] = None,
+    on_cad: Optional[Callable] = None,
 ) -> dict:
     """Run a full job; writes the bundle under job_dir; returns the results doc."""
     opts = {**DEFAULT_OPTIONS, **(options or {})}
@@ -243,9 +246,12 @@ def run_job(
     opt = run_optimization(
         inputs, n=opts["n_candidates"], seed=opts["seed"],
         grid_mm=opts["grid_mm"], progress=ev_progress,
+        on_candidate=on_candidate,
     )
     emit("select", 0.7, "selecting designs")
     selected = select_designs(opt)
+    if on_selected:
+        on_selected(selected)
 
     cand_rows = []
     zone_labels = []
@@ -346,6 +352,10 @@ def run_job(
                 "volume_rel_err": abs(art.volume_mm3 - art.model_volume_mm3) / art.model_volume_mm3,
                 "fin_count": art.fin_count, "valid": art.is_valid,
             }
+            if on_cad:
+                on_cad(did, {"step": Path(art.step_path).read_bytes(),
+                             "stl": Path(art.stl_path).read_bytes(),
+                             "glb": Path(art.glb_path).read_bytes()})
         ev_fields = evaluate(inputs, c.design, grid_mm=opts["grid_mm"], want_fields=True)
         fe = bundle.write(f"{ddir}/fields.json",
                           {"schema_version": "coldplate-fields/1", **ev_fields.fields},

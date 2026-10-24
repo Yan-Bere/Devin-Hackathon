@@ -215,6 +215,7 @@ def run_optimization(
     seed: int = 42,
     grid_mm: float = 0.5,
     progress: Optional[Callable] = None,
+    on_candidate: Optional[Callable] = None,
 ) -> OptimizationResult:
     assumptions: list[str] = []
     designs, rejected = generate_candidates(
@@ -267,6 +268,8 @@ def run_optimization(
         ))
         if progress:
             progress(k + 1, len(designs), f"evaluated {k + 1}/{len(designs)}")
+        if on_candidate:
+            on_candidate(cands[-1])
 
     feas = [c for c in cands if c.feasible]
     xy = [(c.metrics["pressure_drop_kPa"], c.metrics["critical_temperature_C"]) for c in feas]

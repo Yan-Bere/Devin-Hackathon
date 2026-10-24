@@ -1,8 +1,10 @@
 """Gradio UI for requirements intake."""
 
 import argparse
+import json
 import os
 import sys
+import urllib.request
 from pathlib import Path
 
 import gradio as gr
@@ -24,6 +26,9 @@ SESSIONS_DIR = BASE_DIR / "sessions"
 THINKING = "…thinking"
 DOWNLOAD_NAMES = ("notes.txt", "requirements.json", "requirements_final.json")
 PARETO_COLUMNS = ["T_hbm_max_C", "delta_p_nominal_kPa", "kind"]
+DASHBOARD_URL = os.getenv("DASHBOARD_URL", "http://127.0.0.1:8000")
+READY_MSG = ("Requirements finalized — I'm ready for stage 3 modelling. "
+             "Click **Open modelling dashboard** to run it.")
 
 
 def render_checklist(session, presented_group=None):
@@ -126,7 +131,46 @@ def _outputs(agent_state, chat, busy, provider_name, textbox_value=""):
         gr.update(interactive=interactive),
         gr.update(interactive=interactive),
         gr.update(interactive=optimize_interactive),
+        gr.update(interactive=optimize_interactive),
     )
+
+
+def start_modelling(agent_state, opener=None):
+    """POST the finalized requirements to the dashboard's modelling endpoint."""
+    if agent_state is None or not agent_state.session.finalized:
+        return "Finalize requirements first."
+    final_path = agent_state.session.dir / "requirements_final.json"
+    try:
+        payload = {"requirements_final": json.loads(
+            final_path.read_text(encoding="utf-8"))}
+    except (OSError, json.JSONDecodeError) as exc:
+        return f"Cannot read finalized requirements: {exc}"
+    url = f"{DASHBOARD_URL}/api/modelling/start"
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    open_url = opener or urllib.request.urlopen
+    try:
+        open_url(request, timeout=5)
+    except Exception:
+        return (f"Dashboard not reachable at {url} — start it with "
+                f"`python run_demo_stack.py`")
+    return f"Modelling started — opening the dashboard at {DASHBOARD_URL}"
+
+
+def _append_ready_message(active_agent, final_chat):
+    """Append the stage-3 ready message exactly once after finalization."""
+    if (
+        active_agent is not None
+        and active_agent.session.finalized
+        and not getattr(active_agent, "_dashboard_ready_announced", False)
+    ):
+        final_chat = final_chat + [{"role": "assistant", "content": READY_MSG}]
+        active_agent._dashboard_ready_announced = True
+    return final_chat
 
 
 def _on_start(chat, start_method, provider_name, sessions_dir):
@@ -145,6 +189,7 @@ def _on_start(chat, start_method, provider_name, sessions_dir):
     except Exception as exc:
         reply = f"Something went wrong: {exc}"
     final_chat = current_chat + [{"role": "assistant", "content": reply}]
+    final_chat = _append_ready_message(active_agent, final_chat)
     yield _outputs(active_agent, final_chat, False, provider_name)
 
 
@@ -183,6 +228,7 @@ def on_send(text, agent_state, chat, provider_name=None, sessions_dir=None):
         {"role": "user", "content": text},
         {"role": "assistant", "content": reply},
     ]
+    final_chat = _append_ready_message(active_agent, final_chat)
     yield _outputs(active_agent, final_chat, False, provider_name)
 
 
@@ -389,6 +435,12 @@ def build_app(provider_name=None):
                         interactive=False,
                         elem_classes="cp-optimize",
                     )
+                    dashboard_button = gr.Button(
+                        "Open modelling dashboard",
+                        variant="secondary",
+                        interactive=False,
+                        elem_classes="cp-dashboard",
+                    )
                 downloads = gr.File(
                     label="Downloads",
                     file_count="multiple",
@@ -451,6 +503,7 @@ def build_app(provider_name=None):
             preset_button,
             blank_button,
             optimize_button,
+            dashboard_button,
         ]
         optimizer_outputs = [
             optimizer_status,
@@ -514,6 +567,12 @@ def build_app(provider_name=None):
             optimize_handler,
             inputs=[agent_state],
             outputs=optimizer_outputs,
+        )
+        dashboard_button.click(
+            fn=start_modelling,
+            inputs=[agent_state],
+            outputs=[optimizer_status],
+            js=f"() => {{ window.open('{DASHBOARD_URL}', '_blank'); }}",
         )
     return demo
 

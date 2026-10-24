@@ -36,6 +36,14 @@
       <span id="conn" class="conn conn-down" title="Live connection"><span class="dot"></span><span class="conn-text">Connecting…</span></span>
     </div>
   </header>
+<div id="campaign-bar" class="campaign-bar hidden">
+  <span id="campaign-mode" class="campaign-tag"></span>
+  <span id="campaign-stage" class="campaign-stage"></span>
+  <div class="campaign-track"><div id="campaign-fill" class="campaign-fill"></div></div>
+  <span id="campaign-devin" class="campaign-devin"></span>
+  <span id="campaign-label" class="campaign-label"></span>
+  <span id="campaign-error" class="campaign-error"></span>
+</div>
 
   <main>
     <section class="stats" id="stats">
@@ -59,6 +67,7 @@
           <span class="hint">Click a point for details</span>
         </div>
         <div id="pareto-plot" class="plot"></div>
+        <div id="campaign-overlay" class="campaign-overlay hidden"><ol id="campaign-steps" class="campaign-steps"></ol></div>
       </div>
 
       <div class="side">
@@ -100,7 +109,7 @@
               <th class="num">Inlet v [m/s]</th><th class="num">Runtime</th>
             </tr>
           </thead>
-          <tbody id="runs-body"><tr><td colspan="9" class="empty">No runs yet.</td></tr></tbody>
+          <tbody id="runs-body"><tr><td colspan="9" class="empty">Waiting for a modelling campaign — finalize requirements in the chat and click Open modelling dashboard.</td></tr></tbody>
         </table>
       </div>
     </section>

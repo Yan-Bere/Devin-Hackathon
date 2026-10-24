@@ -58,6 +58,26 @@ def create_app(cfg: AppConfig) -> FastAPI:
             raise HTTPException(status_code=404, detail="Geometry not found")
         return FileResponse(files[0], media_type="model/stl", filename=files[0].name)
 
+    from app import modelling
+
+    @app.post("/api/modelling/start")
+    def modelling_start(body: dict = None):
+        return modelling.start(body or {}, cfg.runs_dir)
+
+    @app.get("/api/modelling/status")
+    def modelling_status():
+        return modelling.status()
+
+    @app.get("/api/runs/{run_id}/files/{name}")
+    def run_file(run_id: str, name: str):
+        from fastapi.responses import FileResponse
+        if name not in modelling._ALLOWED_FILES:
+            return {"error": {"code": "not_allowed", "message": name}}
+        p = cfg.runs_dir / run_id / name
+        if not p.is_file() or ".." in run_id or "/" in run_id or "\\" in run_id:
+            return {"error": {"code": "not_found", "message": name}}
+        return FileResponse(p)
+
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):
         await hub.connect(websocket)

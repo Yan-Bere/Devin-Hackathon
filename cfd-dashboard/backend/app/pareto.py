@@ -9,10 +9,12 @@ def pareto_ids(runs: Iterable[Any]) -> set[str]:
         metrics = value.get("metrics", {})
         pressure = metrics.get("pressure_drop_pa")
         temperature = metrics.get("max_temperature_k")
+        details = value.get("details") or {}
         if (
             value.get("status") == "completed"
             and pressure is not None
             and temperature is not None
+            and details.get("feasible", True) is not False
         ):
             candidates.append((str(value["id"]), float(pressure), float(temperature)))
 

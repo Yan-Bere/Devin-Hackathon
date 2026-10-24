@@ -12,8 +12,8 @@ dependencies = [
     "numpy==2.5.4",
     "scipy==1.18.1",
     "pydantic==2.14.1",
-    "fastapi==0.143.3",
-    "uvicorn==0.54.0",
+    "fastapi>=0.115.12,<0.144",
+    "uvicorn>=0.34.2,<0.55",
     "httpx==0.28.1",
     "python-dotenv==1.2.4",
     "python-multipart==0.0.32",
@@ -22,7 +22,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest==9.1.1",
+    "pytest>=8.3.5,<9.2",
 ]
 
 [tool.setuptools]

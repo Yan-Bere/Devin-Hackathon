@@ -35,6 +35,7 @@ def test_runs_api_and_geometry(tmp_path):
             "on_pareto",
             "error",
             "has_geometry",
+            "details",
         }
 
         details = client.get("/api/runs/run_0007")

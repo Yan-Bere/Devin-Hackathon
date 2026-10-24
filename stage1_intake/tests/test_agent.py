@@ -261,10 +261,10 @@ def test_scripted_happy_path_records_inputs_confirms_groups_and_finalizes(tmp_pa
 
     assert session.finalized is True
     assert (session.dir / "requirements_final.json").exists()
-    final_document = json.loads((session.dir / "requirements_final.json").read_text())
+    final_document = json.loads((session.dir / "requirements_final.json").read_text(encoding="utf-8"))
     assert final_document["fields"]["tim_resistance"]["status"] == "user_provided"
     assert final_document["fields"]["tim_resistance"]["source_quote"] == "0.08 cm2K/W"
-    notes = (session.dir / "notes.txt").read_text()
+    notes = (session.dir / "notes.txt").read_text(encoding="utf-8")
     assert "Yes those limits are right, but over 4 psi is a penalty, not disqualification." in notes
     assert "Use 2 L/min nominal, 30 C inlet, sweep flow only at 30 C." in notes
     assert "Actually make the TIM 0.08 cm2K/W." in notes
@@ -441,7 +441,7 @@ def test_system_digest_is_rebuilt_after_tool_round_and_system_logs_are_not_user(
     )[1]
     assert json.loads(encoded_digest) == digest
 
-    notes = (session.dir / "notes.txt").read_text()
+    notes = (session.dir / "notes.txt").read_text(encoding="utf-8")
     assert "SYSTEM: \"[system] The user loaded the ITherm 2027 preset." in notes
     assert 'USER: "[system]' not in notes
 
@@ -600,7 +600,7 @@ def test_provider_error_rolls_back_history_and_keeps_session_mutations(tmp_path)
     assert session.fields["dp_hard_limit"].value != original_limit
     assert session.fields["dp_hard_limit"].status == "user_provided"
     assert intake_agent._summary_shown_last_turn is False
-    assert "Set the pressure limit to 4 psi." in (session.dir / "notes.txt").read_text()
+    assert "Set the pressure limit to 4 psi." in (session.dir / "notes.txt").read_text(encoding="utf-8")
 
 
 def test_complete_session_gets_deterministic_summary_and_can_be_finalized(tmp_path):
