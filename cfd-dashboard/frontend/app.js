@@ -239,7 +239,8 @@ function renderPareto() {
   if (!paretoInit) {
     paretoInit = true;
     $("pareto-plot").on("plotly_click", (ev) => {
-      const id = ev.points?.[0]?.customdata?.[0];
+      const cd = ev.points?.[0]?.customdata;
+      const id = Array.isArray(cd) ? cd[0] : cd;
       const run = id && state.runs.get(id);
       if (run && !(run.details && run.details.source && !run.has_geometry)) openModal(id);
     });
