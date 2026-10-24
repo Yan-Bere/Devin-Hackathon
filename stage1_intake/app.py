@@ -242,11 +242,11 @@ def _sweep_rows(result):
         {
             "Flow (L/min)": point["flow_L_min"],
             "Inlet (°C)": point["inlet_temp_C"],
-            "ΔP (kPa)": point["delta_p_kPa"],
-            "ΔP (psi)": point["delta_p_psi"],
-            "GPU max (°C)": point["max_gpu_C"],
-            "HBM max (°C)": point["max_hbm_C"],
-            "Coolant rise (K)": point["coolant_outlet_rise_K"],
+            "ΔP (kPa)": round(point["delta_p_kPa"], 2),
+            "ΔP (psi)": round(point["delta_p_psi"], 3),
+            "GPU max (°C)": round(point["max_gpu_C"], 2),
+            "HBM max (°C)": round(point["max_hbm_C"], 2),
+            "Coolant rise (K)": round(point["coolant_outlet_rise_K"], 2),
         }
         for point in result["sweep"]
     ]
