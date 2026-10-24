@@ -2,3 +2,5 @@ gradio
 google-genai
 python-dotenv
 pytest
+scipy
+trimesh

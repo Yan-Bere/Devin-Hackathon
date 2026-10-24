@@ -2,9 +2,11 @@
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
 import gradio as gr
+import pandas as pd
 
 import agent as intake_agent
 import llm
@@ -13,9 +15,13 @@ import state as intake_state
 
 
 BASE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = BASE_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 SESSIONS_DIR = BASE_DIR / "sessions"
 THINKING = "…thinking"
 DOWNLOAD_NAMES = ("notes.txt", "requirements.json", "requirements_final.json")
+PARETO_COLUMNS = ["T_hbm_max_C", "delta_p_nominal_kPa", "kind"]
 
 
 def render_checklist(session, presented_group=None):
@@ -150,6 +156,11 @@ def _chat(chat):
 def _outputs(agent_state, chat, busy, provider_name, textbox_value=""):
     progress, checklist, files, footer = _panel(agent_state, provider_name)
     interactive = not busy
+    optimize_interactive = bool(
+        interactive
+        and agent_state is not None
+        and agent_state.session.finalized
+    )
     return (
         agent_state,
         chat,
@@ -161,6 +172,7 @@ def _outputs(agent_state, chat, busy, provider_name, textbox_value=""):
         gr.update(interactive=interactive),
         gr.update(interactive=interactive),
         gr.update(interactive=interactive),
+        gr.update(interactive=optimize_interactive),
     )
 
 
@@ -221,6 +233,166 @@ def on_send(text, agent_state, chat, provider_name=None, sessions_dir=None):
     yield _outputs(active_agent, final_chat, False, provider_name)
 
 
+def _run_optimizer(requirements_path):
+    from stage2_optimizer.run import run
+
+    return run(requirements_path)
+
+
+def _format_design_status(record):
+    if record["feasible"]:
+        return "PASS"
+    return "FAIL: " + "; ".join(
+        f'{item["name"]} {item["actual"]:.2f} > '
+        f'{item["limit"]:.2f} {item["unit"]}'
+        for item in record["failing_constraints"]
+    )
+
+
+def _optimizer_summary(result):
+    lines = [
+        "| Design | Fin thickness (mm) | Gap (mm) | Fin count | "
+        "Max GPU (°C) | Max HBM (°C) | ΔP nominal (kPa / psi) | "
+        "Pumping power (W) | FoM | Limits |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    for label in ("baseline", "optimized"):
+        record = result[label]
+        nominal = record["nominal"]
+        lines.append(
+            f'| {label.title()} | {record["fin_thickness_mm"]:.3f} | '
+            f'{record["gap_mm"]:.3f} | {record["fin_count"]} | '
+            f'{record["T_gpu_max_C"]:.2f} | {record["T_hbm_max_C"]:.2f} | '
+            f'{nominal["delta_p_kPa"]:.2f} / {nominal["delta_p_psi"]:.2f} | '
+            f'{nominal["pumping_power_W"]:.3f} | {record["fom"]:.5f} | '
+            f'{_format_design_status(record)} |'
+        )
+    if not result["feasible"]:
+        lines.extend(
+            [
+                "",
+                "**No feasible design found; returning the best-FoM design.**",
+                "",
+                "**Failing constraints:**",
+            ]
+        )
+        lines.extend(
+            f'- {item["name"]}: {item["actual"]:.2f} {item["unit"]} '
+            f'(limit {item["limit"]:.2f} {item["unit"]})'
+            for item in result["failing_constraints"]
+        )
+    return "\n".join(lines)
+
+
+def _sweep_rows(result):
+    return [
+        {
+            "Flow (L/min)": point["flow_L_min"],
+            "Inlet (°C)": point["inlet_temp_C"],
+            "ΔP (kPa)": point["delta_p_kPa"],
+            "ΔP (psi)": point["delta_p_psi"],
+            "GPU max (°C)": point["max_gpu_C"],
+            "HBM max (°C)": point["max_hbm_C"],
+            "Coolant rise (K)": point["coolant_outlet_rise_K"],
+        }
+        for point in result["sweep"]
+    ]
+
+
+def _pareto_frame(result):
+    rows = []
+    for record in result["evaluations"]:
+        rows.append(
+            {
+                "T_hbm_max_C": record["T_hbm_max_C"],
+                "delta_p_nominal_kPa": record["delta_p_nominal_kPa"],
+                "kind": (
+                    "candidate (feasible)"
+                    if record["feasible"]
+                    else "candidate (infeasible)"
+                ),
+            }
+        )
+    for name, kind in (("baseline", "baseline"), ("optimized", "optimum")):
+        record = result[name]
+        rows.append(
+            {
+                "T_hbm_max_C": record["T_hbm_max_C"],
+                "delta_p_nominal_kPa": record["delta_p_nominal_kPa"],
+                "kind": kind,
+            }
+        )
+    return pd.DataFrame(rows, columns=PARETO_COLUMNS)
+
+
+def on_optimize(agent_state, runner=None):
+    finalized = bool(
+        agent_state is not None and agent_state.session.finalized
+    )
+    empty_pareto = pd.DataFrame(columns=PARETO_COLUMNS)
+    if not finalized:
+        yield (
+            "Optimize is available after requirements are finalized.",
+            "",
+            [],
+            empty_pareto,
+            None,
+            [],
+            gr.update(interactive=False),
+        )
+        return
+
+    yield (
+        "Optimizing… (reduced-order model)",
+        "",
+        [],
+        empty_pareto,
+        None,
+        [],
+        gr.update(interactive=False),
+    )
+    try:
+        run_optimizer = runner or _run_optimizer
+        result = run_optimizer(
+            agent_state.session.dir / "requirements_final.json"
+        )
+        files = [
+            path
+            for path in (
+                result["files"].get("step_path"),
+                result["files"].get("stl_path"),
+            )
+            if path
+        ]
+        status = (
+            f"Optimization complete in {result['run_elapsed_seconds']:.2f} s."
+            if result["feasible"]
+            else (
+                f"No feasible design; best-FoM result returned in "
+                f"{result['run_elapsed_seconds']:.2f} s."
+            )
+        )
+        yield (
+            status,
+            _optimizer_summary(result),
+            pd.DataFrame(_sweep_rows(result)),
+            _pareto_frame(result),
+            result["files"].get("stl_path"),
+            files,
+            gr.update(interactive=True),
+        )
+    except Exception as exc:
+        yield (
+            f"Optimization failed: {type(exc).__name__}: {exc}",
+            "",
+            [],
+            empty_pareto,
+            None,
+            [],
+            gr.update(interactive=True),
+        )
+
+
 def build_app(provider_name=None):
     with gr.Blocks(title="Cold Plate Requirements Intake — ITherm 2027") as demo:
         gr.Markdown(
@@ -246,6 +418,11 @@ def build_app(provider_name=None):
                 with gr.Row():
                     preset_button = gr.Button("Load ITherm 2027 preset")
                     blank_button = gr.Button("Start blank")
+                    optimize_button = gr.Button(
+                        "Optimize",
+                        variant="primary",
+                        interactive=False,
+                    )
             with gr.Column(scale=2):
                 progress = gr.Markdown(_empty_progress())
                 checklist = gr.Markdown("Load the preset or send a message to begin.")
@@ -255,6 +432,55 @@ def build_app(provider_name=None):
                     interactive=False,
                 )
                 footer = gr.Markdown(_footer(None, provider_name))
+                gr.Markdown(
+                    "**Reduced-order model (not CFD). Use for design screening only.**"
+                )
+                optimizer_status = gr.Markdown("Finalize requirements to optimize.")
+                optimizer_summary = gr.Markdown()
+                sweep_results = gr.Dataframe(
+                    headers=[
+                        "Flow (L/min)",
+                        "Inlet (°C)",
+                        "ΔP (kPa)",
+                        "ΔP (psi)",
+                        "GPU max (°C)",
+                        "HBM max (°C)",
+                        "Coolant rise (K)",
+                    ],
+                    interactive=False,
+                    label="Operating-point sweep",
+                )
+                pareto_plot = gr.ScatterPlot(
+                    value=pd.DataFrame(columns=PARETO_COLUMNS),
+                    x="delta_p_nominal_kPa",
+                    y="T_hbm_max_C",
+                    color="kind",
+                    color_map={
+                        "candidate (feasible)": "#398439",
+                        "candidate (infeasible)": "#999999",
+                        "baseline": "#d9534f",
+                        "optimum": "#337ab7",
+                    },
+                    colors_in_legend=[
+                        "candidate (feasible)",
+                        "candidate (infeasible)",
+                        "baseline",
+                        "optimum",
+                    ],
+                    title="Pareto candidates",
+                    x_title="ΔP at nominal flow (kPa)",
+                    y_title="Worst HBM maximum temperature (°C)",
+                    height=320,
+                )
+                optimized_model = gr.Model3D(
+                    label="Optimized cold plate (STL)",
+                    height=400,
+                )
+                optimizer_files = gr.File(
+                    label="Optimized STEP/STL",
+                    file_count="multiple",
+                    interactive=False,
+                )
 
         outputs = [
             agent_state,
@@ -267,6 +493,16 @@ def build_app(provider_name=None):
             send_button,
             preset_button,
             blank_button,
+            optimize_button,
+        ]
+        optimizer_outputs = [
+            optimizer_status,
+            optimizer_summary,
+            sweep_results,
+            pareto_plot,
+            optimized_model,
+            optimizer_files,
+            optimize_button,
         ]
 
         def send_handler(text, current_agent, current_chat):
@@ -294,6 +530,9 @@ def build_app(provider_name=None):
                 SESSIONS_DIR,
             )
 
+        def optimize_handler(current_agent):
+            yield from on_optimize(current_agent)
+
         textbox.submit(
             send_handler,
             inputs=[textbox, agent_state, chatbot],
@@ -313,6 +552,11 @@ def build_app(provider_name=None):
             blank_handler,
             inputs=[agent_state, chatbot],
             outputs=outputs,
+        )
+        optimize_button.click(
+            optimize_handler,
+            inputs=[agent_state],
+            outputs=optimizer_outputs,
         )
     return demo
 

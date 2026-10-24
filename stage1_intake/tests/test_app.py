@@ -1,4 +1,5 @@
 import gradio as gr
+import pandas as pd
 
 import agent
 import app
@@ -30,6 +31,19 @@ def test_build_app_constructs_gradio_six_messages_ui():
             "Collects and validates the simulation inputs and writes "
             "`requirements_final.json` for the optimizer stage."
         )
+        for component in demo.blocks.values()
+    )
+    assert any(
+        isinstance(component, gr.ScatterPlot)
+        for component in demo.blocks.values()
+    )
+    assert any(
+        isinstance(component, gr.Model3D)
+        for component in demo.blocks.values()
+    )
+    assert any(
+        getattr(component, "value", None) == "Optimize"
+        and not component.interactive
         for component in demo.blocks.values()
     )
 
@@ -104,8 +118,9 @@ def test_preset_then_send_confirms_group_and_updates_chat(tmp_path):
 
     assert waiting_chat[-2] == {"role": "user", "content": "yes"}
     assert waiting_chat[-1] == {"role": "assistant", "content": "…thinking"}
-    assert all(not update["interactive"] for update in results[0][6:])
-    assert all(update["interactive"] for update in result[6:])
+    assert all(not update["interactive"] for update in results[0][6:11])
+    assert all(update["interactive"] for update in result[6:10])
+    assert result[10]["interactive"] is False
     assert updated_agent.session.fields["dp_hard_limit"].status == "user_provided"
     assert "✅ Pressure-drop hard limit:" in checklist
     assert {"role": "user", "content": "yes"} in updated_chat
@@ -152,6 +167,115 @@ def test_mock_handlers_finalize_and_expose_final_download(tmp_path):
     assert intake_agent.session.finalized is True
     assert str(intake_agent.session.dir / "requirements_final.json") in downloads
     assert "Finalized ✅" in progress
+    assert result[10]["interactive"] is True
+
+
+def test_optimize_handler_yields_progress_and_results(tmp_path, monkeypatch):
+    class FinalizedSession:
+        finalized = True
+        dir = tmp_path
+
+    class AgentState:
+        session = FinalizedSession()
+
+    nominal = {
+        "delta_p_kPa": 2.0,
+        "delta_p_psi": 0.29,
+        "pumping_power_W": 0.1,
+    }
+    baseline = {
+        "fin_thickness_mm": 0.3,
+        "gap_mm": 0.3,
+        "fin_count": 86,
+        "T_gpu_max_C": 70.0,
+        "T_hbm_max_C": 50.0,
+        "delta_p_nominal_kPa": 2.0,
+        "fom": 0.0,
+        "feasible": False,
+        "constraints": [],
+        "failing_constraints": [],
+        "nominal": nominal,
+    }
+    optimized = {
+        **baseline,
+        "fin_thickness_mm": 0.2,
+        "gap_mm": 0.2,
+        "fom": 0.05,
+        "T_gpu_max_C": 68.0,
+        "T_hbm_max_C": 48.0,
+        "failing_constraints": [
+            {
+                "name": "Coolant outlet rise",
+                "actual": 21.5,
+                "limit": 12.0,
+                "unit": "K",
+            }
+        ],
+    }
+    sweep = [
+        {
+            "flow_L_min": 1.0,
+            "inlet_temp_C": 30.0,
+            "delta_p_kPa": 1.0,
+            "delta_p_psi": 0.15,
+            "max_gpu_C": 80.0,
+            "max_hbm_C": 55.0,
+            "coolant_outlet_rise_K": 21.5,
+        }
+    ]
+    fake_result = {
+        "baseline": baseline,
+        "optimized": optimized,
+        "feasible": False,
+        "failing_constraints": optimized["failing_constraints"],
+        "sweep": sweep,
+        "evaluations": [
+            {
+                "T_hbm_max_C": 48.0,
+                "delta_p_nominal_kPa": 2.0,
+                "feasible": False,
+            }
+        ],
+        "files": {
+            "stl_path": str(tmp_path / "optimized.stl"),
+            "step_path": str(tmp_path / "optimized.step"),
+        },
+        "run_elapsed_seconds": 2.5,
+    }
+
+    results = list(app.on_optimize(AgentState(), runner=lambda path: fake_result))
+
+    assert len(results) == 2
+    assert results[0][0] == "Optimizing… (reduced-order model)"
+    assert "No feasible design found" in results[1][1]
+    assert "Coolant outlet rise" in results[1][1]
+    assert isinstance(results[1][2], pd.DataFrame)
+    assert isinstance(results[1][3], pd.DataFrame)
+    assert {"baseline", "optimum"} <= set(results[1][3]["kind"])
+    assert results[1][4] == fake_result["files"]["stl_path"]
+    assert results[1][5] == [
+        fake_result["files"]["step_path"],
+        fake_result["files"]["stl_path"],
+    ]
+    assert results[1][6]["interactive"] is True
+
+
+def test_optimize_handler_catches_errors(tmp_path):
+    class FinalizedSession:
+        finalized = True
+        dir = tmp_path
+
+    class AgentState:
+        session = FinalizedSession()
+
+    results = list(
+        app.on_optimize(
+            AgentState(),
+            runner=lambda path: (_ for _ in ()).throw(RuntimeError("optimizer broke")),
+        )
+    )
+
+    assert "Optimization failed: RuntimeError: optimizer broke" in results[-1][0]
 
 
 def test_send_starts_blank_session_when_agent_state_is_empty(tmp_path):
