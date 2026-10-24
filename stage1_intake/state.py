@@ -117,6 +117,10 @@ class Session:
         self._log(f'BOT: "{str(text)[:300]}"')
         self.save()
 
+    def log_system(self, text):
+        self._log(f'SYSTEM: "{text}"')
+        self.save()
+
     def _original_unit(self, value, unit):
         if isinstance(value, str):
             try:
@@ -420,6 +424,35 @@ class Session:
         if isinstance(state.value, (dict, list)):
             return json.dumps(state.value, ensure_ascii=False, separators=(",", ":"))
         return str(state.value)
+
+    def summary_text(self):
+        lines = []
+        for group_number, group_name in schema.GROUPS.items():
+            group_fields = [
+                item for item in schema.FIELDS
+                if item.group == group_number and self.fields[item.id].status != "missing"
+            ]
+            if not group_fields:
+                continue
+            lines.append(f"Group {group_number} — {group_name}")
+            for item in group_fields:
+                state = self.fields[item.id]
+                assumption = " (ASSUMPTION)" if item.is_assumption else ""
+                display = self._display_value(item, state)
+                if item.type == "table":
+                    total = sum(row.get("power_W", 0) for row in (state.value or []))
+                    display = f"{len(state.value)} rows, {total:g} W"
+                lines.append(
+                    f"  {item.label}: {display}{assumption} [{state.status}]"
+                )
+        failing = [result for result in self.checks() if result.level != "ok"]
+        if failing:
+            for result in failing:
+                acknowledged = " (acknowledged)" if result.acknowledged else ""
+                lines.append(f"Checks: {result.id} ({result.level}): {result.message}{acknowledged}")
+        else:
+            lines.append("Checks: none failing")
+        return "\n".join(lines)
 
     def _notes_text(self):
         lines = [f"=== Cold plate intake session {self.session_id} ==="]
