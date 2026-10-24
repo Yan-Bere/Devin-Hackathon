@@ -201,11 +201,19 @@ function renderPareto() {
     y: list.map((r) => r.metrics.max_temperature_k),
     customdata: list.map((r) => [r.id]),
   });
+  // Modelling runs without CAD (only the 5 selected designs get geometry) are greyed out and
+  // inert: no hover, no click. OpenFOAM runs and runs with geometry stay interactive.
+  const noCad = (r) => r.details && r.details.source && !r.has_geometry;
+  const frontCad = front.filter((r) => !noCad(r));
   const traces = [
-    { ...pts(dominated), name: "Dominated", mode: "markers", type: "scatter", hovertemplate: hover,
+    { ...pts(completed.filter(noCad)), name: "No CAD (metrics only)", mode: "markers", type: "scatter",
+      hoverinfo: "skip", marker: { size: 8, color: "rgba(90,98,110,.35)", line: { width: 0 } } },
+    { ...pts(dominated.filter((r) => !noCad(r))), name: "Dominated", mode: "markers", type: "scatter", hovertemplate: hover,
       marker: { size: 9, color: "rgba(139,152,168,.55)", line: { width: 1, color: "#8b98a8" } } },
-    { ...pts(front), name: "Pareto front", mode: "lines+markers", type: "scatter", hovertemplate: hover,
-      line: { shape: "hv", color: COLORS.accent, width: 2, dash: "dot" },
+    { x: front.map((r) => r.metrics.pressure_drop_pa), y: front.map((r) => r.metrics.max_temperature_k),
+      name: "Pareto front", mode: "lines", type: "scatter", hoverinfo: "skip",
+      line: { shape: "hv", color: COLORS.accent, width: 2, dash: "dot" } },
+    { ...pts(frontCad), name: "Pareto (with CAD)", mode: "markers", type: "scatter", hovertemplate: hover,
       marker: { size: 12, color: COLORS.accent, symbol: "star", line: { width: 1, color: "#fff" } } },
     { ...pts(running), name: "Running (live estimate)", mode: "markers", type: "scatter",
       hovertemplate: "<b>%{customdata[0]}</b> (running)<br>ΔP %{x:.1f} Pa<br>Tmax %{y:.1f} K<extra></extra>",
@@ -230,7 +238,8 @@ function renderPareto() {
     paretoInit = true;
     $("pareto-plot").on("plotly_click", (ev) => {
       const id = ev.points?.[0]?.customdata?.[0];
-      if (id) openModal(id);
+      const run = id && state.runs.get(id);
+      if (run && !(run.details && run.details.source && !run.has_geometry)) openModal(id);
     });
   }
 }
