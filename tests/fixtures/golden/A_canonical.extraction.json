@@ -1,0 +1,446 @@
+{
+  "schema_version": "coldplate-extraction/1",
+  "document_title": "ITherm 2027 Cold Plate: Simulation Inputs",
+  "coordinate_frame": {
+    "value": "Origin is the lower-left corner of the 52.15 × 50.30 mm die region",
+    "source": "input",
+    "evidence": "Origin is the lower-left corner of the 52.15 × 50.30 mm die region.",
+    "note": null
+  },
+  "plate": {
+    "length_x": {
+      "value": 78.0,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "| Base plate | 78 × 78 × 2 mm, rolled copper (C110 assumed, k = 391 W/m·K), centered on package |",
+      "note": null
+    },
+    "width_y": {
+      "value": 78.0,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "| Base plate | 78 × 78 × 2 mm, rolled copper (C110 assumed, k = 391 W/m·K), centered on package |",
+      "note": null
+    },
+    "thickness": {
+      "value": 2.0,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "| Base plate | 78 × 78 × 2 mm, rolled copper (C110 assumed, k = 391 W/m·K), centered on package |",
+      "note": null
+    },
+    "material": {
+      "value": "rolled copper (C110 assumed)",
+      "source": "input_flagged_assumption",
+      "evidence": "| Base plate | 78 × 78 × 2 mm, rolled copper (C110 assumed, k = 391 W/m·K), centered on package |",
+      "note": "C110 grade marked as assumed"
+    },
+    "thermal_conductivity": {
+      "value": 391.0,
+      "unit": "W/m·K",
+      "source": "input_flagged_assumption",
+      "evidence": "| Base plate | 78 × 78 × 2 mm, rolled copper (C110 assumed, k = 391 W/m·K), centered on package |",
+      "note": "conductivity given alongside an assumed grade"
+    },
+    "placement": {
+      "value": "centered on package",
+      "source": "input",
+      "evidence": "| Base plate | 78 × 78 × 2 mm, rolled copper (C110 assumed, k = 391 W/m·K), centered on package |",
+      "note": null
+    }
+  },
+  "fin_region": {
+    "length_x": {
+      "value": 52.15,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "| Fin design space | 52.15 × 52.15 × 2.0 mm, centered on package |",
+      "note": null
+    },
+    "width_y": {
+      "value": 52.15,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "| Fin design space | 52.15 × 52.15 × 2.0 mm, centered on package |",
+      "note": null
+    },
+    "height": {
+      "value": 2.0,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "| Fin design space | 52.15 × 52.15 × 2.0 mm, centered on package |",
+      "note": null
+    },
+    "placement": {
+      "value": "centered on package",
+      "source": "input",
+      "evidence": "| Fin design space | 52.15 × 52.15 × 2.0 mm, centered on package |",
+      "note": null
+    }
+  },
+  "die_region": {
+    "width_x": {
+      "value": 52.15,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "Origin is the lower-left corner of the 52.15 × 50.30 mm die region.",
+      "note": null
+    },
+    "height_y": {
+      "value": 50.30,
+      "unit": "mm",
+      "source": "input",
+      "evidence": "Origin is the lower-left corner of the 52.15 × 50.30 mm die region.",
+      "note": null
+    },
+    "placement": {
+      "value": null,
+      "source": "missing",
+      "evidence": null,
+      "note": "die region position relative to the plate not stated"
+    }
+  },
+  "heat_sources": [
+    {
+      "name": "GPU1", "type": "GPU",
+      "x0": 0.00, "y0": 10.15, "width": 26.0, "height": 30.0,
+      "length_unit": "mm", "power": 554.4, "power_unit": "W",
+      "source": "input",
+      "evidence": "| GPU1 | GPU | 0.00 | 10.15 | 26.0 | 30.0 | 554.4 | 71.1 |",
+      "note": null
+    },
+    {
+      "name": "GPU2", "type": "GPU",
+      "x0": 26.15, "y0": 10.15, "width": 26.0, "height": 30.0,
+      "length_unit": "mm", "power": 554.4, "power_unit": "W",
+      "source": "input",
+      "evidence": "| GPU2 | GPU | 26.15 | 10.15 | 26.0 | 30.0 | 554.4 | 71.1 |",
+      "note": null
+    },
+    {
+      "name": "H1", "type": "HBM",
+      "x0": 0.00, "y0": 40.30, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H1 | HBM | 0.00 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H2", "type": "HBM",
+      "x0": 14.00, "y0": 40.30, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H2 | HBM | 14.00 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H3", "type": "HBM",
+      "x0": 26.15, "y0": 40.30, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H3 | HBM | 26.15 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H4", "type": "HBM",
+      "x0": 40.15, "y0": 40.30, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H4 | HBM | 40.15 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H5", "type": "HBM",
+      "x0": 0.00, "y0": 0.00, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H5 | HBM | 0.00 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H6", "type": "HBM",
+      "x0": 14.00, "y0": 0.00, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H6 | HBM | 14.00 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H7", "type": "HBM",
+      "x0": 26.15, "y0": 0.00, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H7 | HBM | 26.15 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    },
+    {
+      "name": "H8", "type": "HBM",
+      "x0": 40.15, "y0": 0.00, "width": 12.0, "height": 10.0,
+      "length_unit": "mm", "power": 48.0, "power_unit": "W",
+      "source": "input",
+      "evidence": "| H8 | HBM | 40.15 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+      "note": null
+    }
+  ],
+  "stated_total_power": {
+    "value": 1492.8,
+    "unit": "W",
+    "source": "input",
+    "evidence": "Total power: **1492.8 W**.",
+    "note": null
+  },
+  "power_map": {
+    "distribution": "non_uniform_file",
+    "file_name": "power_map_W_per_mm2.csv",
+    "file_units": "W/mm^2",
+    "grid_pitch": {
+      "value": 0.5,
+      "unit": "mm",
+      "source": "input_flagged_assumption",
+      "evidence": "Grid file: `power_map_W_per_mm2.csv`, 0.5 mm pitch. Row 0 is y = 0.25 mm (bottom), column 0 is x = 0.25 mm (left).",
+      "note": null
+    },
+    "grid_origin": {
+      "value": "Row 0 is y = 0.25 mm (bottom), column 0 is x = 0.25 mm (left)",
+      "source": "input_flagged_assumption",
+      "evidence": "Grid file: `power_map_W_per_mm2.csv`, 0.5 mm pitch. Row 0 is y = 0.25 mm (bottom), column 0 is x = 0.25 mm (left).",
+      "note": null
+    },
+    "stated_peak_flux": {
+      "value": 134.0,
+      "unit": "W/cm²",
+      "source": "input_flagged_assumption",
+      "evidence": "Peak flux: about **134 W/cm²**.",
+      "note": "approximate, marked 'about'"
+    },
+    "uniform_components": ["HBM"],
+    "source": "input_flagged_assumption",
+    "evidence": "**ASSUMPTION:** estimated from the color bands in the competition figure.",
+    "note": "organizers' exact map may replace this"
+  },
+  "temperature_limits": [
+    {
+      "component_type": "GPU",
+      "hard_max": {
+        "value": 100.0, "unit": "°C", "source": "input",
+        "evidence": "| GPU max temp | 100 °C | ≤ 85 °C | ≤ 80 °C |", "note": null
+      },
+      "target_max": {
+        "value": 85.0, "unit": "°C", "source": "input",
+        "evidence": "| GPU max temp | 100 °C | ≤ 85 °C | ≤ 80 °C |", "note": null
+      },
+      "stretch_max": {
+        "value": 80.0, "unit": "°C", "source": "input",
+        "evidence": "| GPU max temp | 100 °C | ≤ 85 °C | ≤ 80 °C |", "note": null
+      }
+    },
+    {
+      "component_type": "HBM",
+      "hard_max": {
+        "value": 70.0, "unit": "°C", "source": "input",
+        "evidence": "| HBM max temp | 70 °C | ≤ 63 °C | ≤ 60 °C |", "note": null
+      },
+      "target_max": {
+        "value": 63.0, "unit": "°C", "source": "input",
+        "evidence": "| HBM max temp | 70 °C | ≤ 63 °C | ≤ 60 °C |", "note": null
+      },
+      "stretch_max": {
+        "value": 60.0, "unit": "°C", "source": "input",
+        "evidence": "| HBM max temp | 70 °C | ≤ 63 °C | ≤ 60 °C |", "note": null
+      }
+    }
+  ],
+  "critical_component": {
+    "value": "HBM",
+    "source": "input",
+    "evidence": "HBM is the binding limit. Check every stack and report the hottest one.",
+    "note": null
+  },
+  "coolant": {
+    "fluid": {
+      "value": "Water",
+      "source": "input_flagged_assumption",
+      "evidence": "| Fluid (**ASSUMPTION**) | Water |",
+      "note": null
+    },
+    "density": {
+      "value": 997.0, "unit": "kg/m³", "source": "input",
+      "evidence": "| Density | 997 kg/m³ |", "note": null
+    },
+    "specific_heat": {
+      "value": 4180.0, "unit": "J/kg·K", "source": "input",
+      "evidence": "| cp | 4180 J/kg·K |", "note": null
+    },
+    "dynamic_viscosity": {
+      "value": 0.000797, "unit": "Pa·s", "source": "input",
+      "evidence": "| Viscosity at 30 °C | 7.97 × 10⁻⁴ Pa·s |", "note": "written as 7.97 × 10⁻⁴ Pa·s"
+    },
+    "thermal_conductivity": {
+      "value": 0.615, "unit": "W/m·K", "source": "input",
+      "evidence": "| Thermal conductivity | 0.615 W/m·K |", "note": null
+    },
+    "inlet_temperature": {
+      "value": 30.0, "unit": "°C", "source": "input_flagged_assumption",
+      "evidence": "| Inlet temp, nominal (**ASSUMPTION**) | 30 °C |", "note": null
+    },
+    "inlet_temperature_sweep": {
+      "values": [20.0, 25.0, 30.0, 35.0], "unit": "°C", "source": "input",
+      "evidence": "| Inlet temp sweep | 20, 25, 30, 35 °C |", "note": null
+    },
+    "flow_rate": {
+      "value": 2.0, "unit": "L/min", "source": "input_flagged_assumption",
+      "evidence": "| Flow, nominal (**ASSUMPTION**) | 2.0 L/min |", "note": null
+    },
+    "flow_rate_sweep": {
+      "values": [1.0, 1.5, 2.0, 2.5, 3.0], "unit": "L/min", "source": "input",
+      "evidence": "| 1.0 | 0.264 | 21.49 |\n| 1.5 | 0.396 | 14.33 |\n| 2.0 | 0.528 | 10.75 |\n| 2.5 | 0.660 | 8.60 |\n| 3.0 | 0.793 | 7.16 |",
+      "note": null
+    },
+    "max_outlet_temperature_rise": {
+      "value": 12.0, "unit": "K", "source": "input",
+      "evidence": "Coolant outlet should stay within **12 K** of inlet.", "note": null
+    }
+  },
+  "flow": {
+    "arrangement": "split_edges_to_center",
+    "flow_axis": "unspecified",
+    "inlet": {
+      "value": "the two outer edges",
+      "source": "input",
+      "evidence": "Coolant enters along the two outer edges",
+      "note": null
+    },
+    "outlet": {
+      "value": "the center outlet over the GPU hotspots",
+      "source": "input",
+      "evidence": "exits through the center outlet over the GPU hotspots",
+      "note": null
+    },
+    "source": "input",
+    "evidence": "Coolant enters along the two outer edges, flows through the fins toward the centerline, and exits through the center outlet over the GPU hotspots.",
+    "note": "document calls it 'split flow'"
+  },
+  "manufacturing": {
+    "min_feature": {
+      "value": 0.1, "unit": "mm", "source": "input",
+      "evidence": "| Min feature | 0.1 mm |", "note": null
+    },
+    "max_feature": {
+      "value": 0.5, "unit": "mm", "source": "input",
+      "evidence": "| Max feature | 0.5 mm |", "note": null
+    },
+    "xy_resolution": {
+      "value": 33.33, "unit": "µm", "source": "input",
+      "evidence": "| Resolution | 33.33 µm (XY), 30 µm (Z) |", "note": null
+    },
+    "z_resolution": {
+      "value": 30.0, "unit": "µm", "source": "input",
+      "evidence": "| Resolution | 33.33 µm (XY), 30 µm (Z) |", "note": null
+    },
+    "min_overhang_angle": {
+      "value": 20.0, "unit": "°", "source": "input",
+      "evidence": "| Min overhang angle | 20° |", "note": null
+    },
+    "process": {
+      "value": null, "source": "missing", "evidence": null, "note": null
+    }
+  },
+  "baseline_design": {
+    "fin_type": {
+      "value": "straight-fin plate",
+      "source": "input",
+      "evidence": "Run a plain straight-fin plate first to check the solver before optimizing:",
+      "note": null
+    },
+    "fin_thickness": {
+      "value": 0.3, "unit": "mm", "source": "input",
+      "evidence": "0.3 mm fins, 0.3 mm gaps, 2 mm tall", "note": null
+    },
+    "channel_width": {
+      "value": 0.3, "unit": "mm", "source": "input",
+      "evidence": "0.3 mm fins, 0.3 mm gaps, 2 mm tall", "note": null
+    },
+    "fin_height": {
+      "value": 2.0, "unit": "mm", "source": "input",
+      "evidence": "0.3 mm fins, 0.3 mm gaps, 2 mm tall", "note": null
+    }
+  },
+  "tim": {
+    "area_resistance": {
+      "value": 0.05, "unit": "cm²·K/W", "source": "input_flagged_assumption",
+      "evidence": "| TIM (**ASSUMPTION**) | R″ = 0.05 cm²·K/W, 0.05 mm thick |", "note": null
+    },
+    "thickness": {
+      "value": 0.05, "unit": "mm", "source": "input_flagged_assumption",
+      "evidence": "| TIM (**ASSUMPTION**) | R″ = 0.05 cm²·K/W, 0.05 mm thick |", "note": null
+    }
+  },
+  "pressure_drop": {
+    "hard_limit": {
+      "value": 27.6, "unit": "kPa", "source": "input",
+      "evidence": "| Pressure drop | 4.0 psi (27.6 kPa) | ≤ 2.0 psi (13.8 kPa) | ≤ 1.0 psi (6.9 kPa) |",
+      "note": "4.0 psi"
+    },
+    "design_target": {
+      "value": 13.8, "unit": "kPa", "source": "input",
+      "evidence": "| Pressure drop | 4.0 psi (27.6 kPa) | ≤ 2.0 psi (13.8 kPa) | ≤ 1.0 psi (6.9 kPa) |",
+      "note": "2.0 psi"
+    },
+    "stretch_goal": {
+      "value": 6.9, "unit": "kPa", "source": "input",
+      "evidence": "| Pressure drop | 4.0 psi (27.6 kPa) | ≤ 2.0 psi (13.8 kPa) | ≤ 1.0 psi (6.9 kPa) |",
+      "note": "1.0 psi"
+    },
+    "acceptance_limit": {
+      "value": 24.1, "unit": "kPa", "source": "input",
+      "evidence": "Reject any design above **3.5 psi (24.1 kPa)** at the highest test flow.",
+      "note": "3.5 psi"
+    },
+    "acceptance_condition": {
+      "value": "at the highest test flow",
+      "source": "input",
+      "evidence": "Reject any design above **3.5 psi (24.1 kPa)** at the highest test flow.",
+      "note": null
+    }
+  },
+  "acceptance": {
+    "temperature_margin": {
+      "value": 5.0, "unit": "K", "source": "input",
+      "evidence": "Reject any design within **5 K** of a temperature hard limit at the worst sweep point (highest inlet temp, lowest flow).",
+      "note": null
+    },
+    "worst_case_condition": {
+      "value": "at the worst sweep point (highest inlet temp, lowest flow)",
+      "source": "input",
+      "evidence": "at the worst sweep point (highest inlet temp, lowest flow)",
+      "note": null
+    }
+  },
+  "objectives": [
+    {
+      "metric": "pressure_drop",
+      "direction": "minimize",
+      "description": "Lower pressure drop scores better, so report ΔP at every flow point.",
+      "source": "input",
+      "evidence": "Lower pressure drop scores better, so report ΔP at every flow point."
+    },
+    {
+      "metric": "max_hbm_temperature",
+      "direction": "minimize",
+      "description": "HBM is the binding limit; report the hottest stack.",
+      "source": "input",
+      "evidence": "HBM is the binding limit. Check every stack and report the hottest one."
+    }
+  ],
+  "assumptions": [
+    {"field": "plate.material", "statement": "copper grade C110 marked as assumed", "source": "input_flagged_assumption"},
+    {"field": "power_map", "statement": "GPU power map estimated from color bands in the competition figure (marked ASSUMPTION)", "source": "input_flagged_assumption"},
+    {"field": "tim", "statement": "TIM R″ = 0.05 cm²·K/W, 0.05 mm marked ASSUMPTION", "source": "input_flagged_assumption"},
+    {"field": "coolant.fluid", "statement": "water marked ASSUMPTION", "source": "input_flagged_assumption"},
+    {"field": "coolant.inlet_temperature", "statement": "30 °C nominal marked ASSUMPTION", "source": "input_flagged_assumption"},
+    {"field": "coolant.flow_rate", "statement": "2.0 L/min nominal marked ASSUMPTION", "source": "input_flagged_assumption"}
+  ],
+  "missing_fields": [
+    {"field": "flow.flow_axis", "reason": "split flow described without naming the axis", "essential": false}
+  ]
+}

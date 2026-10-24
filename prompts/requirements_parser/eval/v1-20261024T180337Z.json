@@ -1,0 +1,319 @@
+{
+  "prompt_version": "v1",
+  "at_utc": "2026-10-24T18:03:36.472548+00:00",
+  "provider": "recorded",
+  "fixtures": [
+    {
+      "fixture": "A_canonical",
+      "status": "ok",
+      "provider_label": "RECORDED Devin output replayed from a fixture (no live Devin call)",
+      "cached": false,
+      "devin_calls": 0,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-3fd8e19ef38a485ba6911ac917acff6a",
+          "url": "https://app.devin.ai/sessions/3fd8e19ef38a485ba6911ac917acff6a",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 45.21899999998277
+        }
+      ],
+      "latency_s": 0.06,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote",
+        "Devin reported 'flow.flow_axis' missing (essential); not required by the engine"
+      ]
+    },
+    {
+      "fixture": "B_flow_3lpm",
+      "status": "ok",
+      "provider_label": "RECORDED Devin output replayed from a fixture (no live Devin call)",
+      "cached": false,
+      "devin_calls": 0,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-11a71c8e637f4644be4cf325eef66d09",
+          "url": "https://app.devin.ai/sessions/11a71c8e637f4644be4cf325eef66d09",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 109.0
+        }
+      ],
+      "latency_s": 0.09,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "B spec flow 3.0: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote",
+        "Devin reported 'flow.flow_axis' missing (essential); not required by the engine"
+      ]
+    },
+    {
+      "fixture": "C_gpu1_power_plus20",
+      "status": "ok",
+      "provider_label": "RECORDED Devin output replayed from a fixture (no live Devin call)",
+      "cached": false,
+      "devin_calls": 0,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-43a51b7393304f26a40d2a744fdb6d95",
+          "url": "https://app.devin.ai/sessions/43a51b7393304f26a40d2a744fdb6d95",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 164.8279999999795
+        }
+      ],
+      "latency_s": 0.08,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "C total_power 1603.68: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [
+        "coolant.flow_rate_sweep: reported value 1.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ],
+      "warnings": [
+        "power map component GPU1: attributed 553.03 W, stated 665.28 W \u2014 rescaled by 1.2030",
+        "power map component GPU2: attributed 553.01 W, stated 554.40 W \u2014 rescaled by 1.0025",
+        "power map component H1: attributed 48.86 W, stated 48.00 W \u2014 rescaled by 0.9825",
+        "power map component H2: attributed 48.51 W, stated 48.00 W \u2014 rescaled by 0.9894",
+        "power map component H3: attributed 48.53 W, stated 48.00 W \u2014 rescaled by 0.9891",
+        "power map component H4: attributed 48.87 W, stated 48.00 W \u2014 rescaled by 0.9823",
+        "power map component H5: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map component H6: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map component H7: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map component H8: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file peak 2.406e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "coolant.flow_rate_sweep: reported value 1.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ]
+    },
+    {
+      "fixture": "D_plate_90x84",
+      "status": "ok",
+      "provider_label": "RECORDED Devin output replayed from a fixture (no live Devin call)",
+      "cached": false,
+      "devin_calls": 0,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-6dc4b52798e84310ab355fba8622d6e7",
+          "url": "https://app.devin.ai/sessions/6dc4b52798e84310ab355fba8622d6e7",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 92.89100000000326
+        }
+      ],
+      "latency_s": 0.07,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "D plate 90x84x2.5: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [
+        "coolant.flow_rate_sweep: reported value 1.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "coolant.flow_rate_sweep: reported value 1.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ]
+    },
+    {
+      "fixture": "E_missing_flow",
+      "status": "needs_input",
+      "provider_label": "RECORDED Devin output replayed from a fixture (no live Devin call)",
+      "cached": false,
+      "devin_calls": 0,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-6fb764d3231248519b5230f85a1068fd",
+          "url": "https://app.devin.ai/sessions/6fb764d3231248519b5230f85a1068fd",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 92.57800000003772
+        }
+      ],
+      "latency_s": 0.06,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "E needs_input, flow missing & never 2.0: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [
+        "coolant.flow_rate"
+      ],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "Devin reported 'coolant.flow_rate_sweep' missing (essential); not required by the engine"
+      ]
+    },
+    {
+      "fixture": "F_impossible_limits",
+      "status": "ok",
+      "provider_label": "RECORDED Devin output replayed from a fixture (no live Devin call)",
+      "cached": false,
+      "devin_calls": 0,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-b1aa1d08dac34d66a4bf7cc140a772b5",
+          "url": "https://app.devin.ai/sessions/b1aa1d08dac34d66a4bf7cc140a772b5",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 100.90600000001723
+        }
+      ],
+      "latency_s": 0.06,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ]
+    }
+  ]
+}

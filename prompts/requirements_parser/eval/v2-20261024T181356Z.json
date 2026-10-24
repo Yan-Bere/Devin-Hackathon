@@ -1,0 +1,272 @@
+{
+  "prompt_version": "v2",
+  "at_utc": "2026-10-24T18:03:50.808864+00:00",
+  "provider": "devin",
+  "fixtures": [
+    {
+      "fixture": "A_canonical",
+      "status": "ok",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-52087cf1afca4f9f855b675af93c26e0",
+          "url": "https://app.devin.ai/sessions/52087cf1afca4f9f855b675af93c26e0",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 84.03100000001723
+        }
+      ],
+      "latency_s": 85.49,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%"
+      ]
+    },
+    {
+      "fixture": "B_flow_3lpm",
+      "status": "ok",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-ffa4458ac6ce4b3a98d590ce1989ffd4",
+          "url": "https://app.devin.ai/sessions/ffa4458ac6ce4b3a98d590ce1989ffd4",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 100.78100000001723
+        }
+      ],
+      "latency_s": 101.99,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "B spec flow 3.0: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%"
+      ]
+    },
+    {
+      "fixture": "C_gpu1_power_plus20",
+      "status": "ok",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-96819c2e67294732829b1ee83dfed74b",
+          "url": "https://app.devin.ai/sessions/96819c2e67294732829b1ee83dfed74b",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 101.56299999996554
+        }
+      ],
+      "latency_s": 103.02,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "C total_power 1603.68: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map component GPU1: attributed 553.03 W, stated 665.28 W \u2014 rescaled by 1.2030",
+        "power map component GPU2: attributed 553.01 W, stated 554.40 W \u2014 rescaled by 1.0025",
+        "power map component H1: attributed 48.86 W, stated 48.00 W \u2014 rescaled by 0.9825",
+        "power map component H2: attributed 48.51 W, stated 48.00 W \u2014 rescaled by 0.9894",
+        "power map component H3: attributed 48.53 W, stated 48.00 W \u2014 rescaled by 0.9891",
+        "power map component H4: attributed 48.87 W, stated 48.00 W \u2014 rescaled by 0.9823",
+        "power map component H5: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map component H6: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map component H7: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map component H8: attributed 48.00 W, stated 48.00 W \u2014 rescaled by 1.0000",
+        "power map file overrides the document's uniform-flux statement for ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8']",
+        "power map file peak 2.406e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "Devin reported 'die_region.placement' missing (essential); not required by the engine"
+      ]
+    },
+    {
+      "fixture": "D_plate_90x84",
+      "status": "ok",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-c4140ae0d317490d9c368df144926244",
+          "url": "https://app.devin.ai/sessions/c4140ae0d317490d9c368df144926244",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 118.28100000001723
+        }
+      ],
+      "latency_s": 119.49,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "D plate 90x84x2.5: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "Devin reported 'flow.flow_axis' missing (essential); not required by the engine"
+      ]
+    },
+    {
+      "fixture": "E_missing_flow",
+      "status": "needs_input",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-dbf473028ca44299bf6abdb089ef5408",
+          "url": "https://app.devin.ai/sessions/dbf473028ca44299bf6abdb089ef5408",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 100.79700000002049
+        }
+      ],
+      "latency_s": 102.04,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [
+        "E needs_input, flow missing & never 2.0: PASS"
+      ],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [
+        "coolant.flow_rate"
+      ],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "Devin reported 'coolant.flow_rate_sweep' missing (essential); not required by the engine",
+        "Devin reported 'die_region.placement' missing (essential); not required by the engine",
+        "Devin reported 'flow.flow_axis' missing (essential); not required by the engine"
+      ]
+    },
+    {
+      "fixture": "F_impossible_limits",
+      "status": "ok",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-9797e57bfe3d433da3ac65052cd09002",
+          "url": "https://app.devin.ai/sessions/9797e57bfe3d433da3ac65052cd09002",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 92.23399999999674
+        }
+      ],
+      "latency_s": 93.6,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [],
+      "unsupported_assumptions": [],
+      "evidence_misses": [],
+      "warnings": [
+        "power map file overrides the document's uniform-flux statement for ['HBM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8']",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%"
+      ]
+    }
+  ]
+}

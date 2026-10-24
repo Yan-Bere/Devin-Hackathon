@@ -1,0 +1,63 @@
+{
+  "prompt_version": "v1",
+  "at_utc": "2026-10-24T17:51:59.504915+00:00",
+  "provider": "devin",
+  "fixtures": [
+    {
+      "fixture": "A_canonical",
+      "status": "needs_input",
+      "provider_label": "Devin API session (live interpretation)",
+      "cached": false,
+      "devin_calls": 1,
+      "schema_failure": false,
+      "repaired": false,
+      "acus": null,
+      "sessions": [
+        {
+          "session_id": "devin-3fd8e19ef38a485ba6911ac917acff6a",
+          "url": "https://app.devin.ai/sessions/3fd8e19ef38a485ba6911ac917acff6a",
+          "kind": "initial",
+          "status": "running",
+          "status_detail": "waiting_for_user",
+          "acus_consumed": null,
+          "elapsed_s": 45.21899999998277
+        }
+      ],
+      "latency_s": 46.82,
+      "findings": [],
+      "counts": {
+        "extraction_error": 0,
+        "provenance_error": 0,
+        "unsupported_assumption": 0,
+        "evidence_miss": 0
+      },
+      "expectations": [],
+      "error": null,
+      "initial_validation_errors": [],
+      "final_validation_errors": [],
+      "missing_essential": [
+        "flow.flow_axis"
+      ],
+      "unsupported_assumptions": [],
+      "evidence_misses": [
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ],
+      "warnings": [
+        "power map component H1: file integrates to 46.80 W, stated 48.00 W \u2014 cells rescaled by 1.0256",
+        "power map component H2: file integrates to 46.80 W, stated 48.00 W \u2014 cells rescaled by 1.0256",
+        "power map component H3: file integrates to 46.22 W, stated 48.00 W \u2014 cells rescaled by 1.0386",
+        "power map component H4: file integrates to 46.22 W, stated 48.00 W \u2014 cells rescaled by 1.0386",
+        "power map file overrides the document's uniform-flux statement for ['HBM']",
+        "power map file places 20.02 W outside every heat-source footprint",
+        "power map file peak 2.000e+06 W/m^2 differs from stated peak 1.340e+06 W/m^2 by >10%",
+        "coolant.flow_rate_sweep: reported value 1.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.0 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 2.5 does not appear in the evidence quote",
+        "coolant.flow_rate_sweep: reported value 3.0 does not appear in the evidence quote"
+      ]
+    }
+  ]
+}

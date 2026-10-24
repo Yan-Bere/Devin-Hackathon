@@ -1,0 +1,7 @@
+# Keep LF everywhere so requirement-document hashes (parse cache keys) and
+# evidence quotes are identical on Windows and Linux checkouts.
+* text=auto eol=lf
+*.step binary
+*.stl binary
+*.glb binary
+*.png binary

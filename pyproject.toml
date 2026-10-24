@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coldplate"
+version = "0.1.0"
+description = "Cold-plate optimization engine (hackathon)"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "cadquery==2.8.0",
+    "numpy==2.5.4",
+    "scipy==1.18.1",
+    "pydantic==2.14.1",
+    "fastapi==0.143.3",
+    "uvicorn==0.54.0",
+    "httpx==0.28.1",
+    "python-dotenv==1.2.4",
+    "python-multipart==0.0.32",
+    "jsonschema==4.26.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+]
+
+[tool.setuptools]
+packages = ["coldplate"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: calls the real Devin API; consumes subscription quota; deselected by default",
+    "slow: long-running checks",
+]

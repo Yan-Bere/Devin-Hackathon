@@ -1,0 +1,14 @@
+body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
+#root { max-width: 1200px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.3rem; }
+.disclaimer { background: #fff4e0; border: 1px solid #e0a030; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; }
+.recorded { background: #e8f0fe; border: 1px solid #4fa3d1; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; }
+.panel { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.design-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.design-button { border: 1px solid #aaa; background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.85rem; }
+.design-button[aria-pressed="true"] { border-color: #2ca02c; box-shadow: 0 0 0 2px #2ca02c44; }
+.job-events { font-family: monospace; font-size: 0.8rem; max-height: 160px; overflow: auto; background: #f6f6f6; padding: 8px; border-radius: 6px; }
+.conflicts { color: #b03030; }
+label { display: block; margin: 6px 0; font-size: 0.9rem; }
+table.metrics { border-collapse: collapse; font-size: 0.85rem; }
+table.metrics td, table.metrics th { border: 1px solid #ddd; padding: 4px 8px; }

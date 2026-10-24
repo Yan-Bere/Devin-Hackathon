@@ -1,0 +1,393 @@
+{
+  "$defs": {
+    "CandidateRecord": {
+      "additionalProperties": true,
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "design_id": {
+          "title": "Design Id",
+          "type": "string"
+        },
+        "is_baseline": {
+          "default": false,
+          "title": "Is Baseline",
+          "type": "boolean"
+        },
+        "params": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Params",
+          "type": "object"
+        },
+        "metrics": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Metrics",
+          "type": "object"
+        },
+        "feasible": {
+          "default": false,
+          "title": "Feasible",
+          "type": "boolean"
+        },
+        "violations": {
+          "default": [],
+          "items": {},
+          "title": "Violations",
+          "type": "array"
+        },
+        "targets_met": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Targets Met",
+          "type": "object"
+        },
+        "worst_case": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Worst Case",
+          "type": "object"
+        },
+        "pareto": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Pareto",
+          "type": "object"
+        },
+        "selected": {
+          "default": false,
+          "title": "Selected",
+          "type": "boolean"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "status_label": {
+          "default": "infeasible",
+          "title": "Status Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "design_id"
+      ],
+      "title": "CandidateRecord",
+      "type": "object"
+    },
+    "SelectedDesign": {
+      "additionalProperties": true,
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "design_id": {
+          "title": "Design Id",
+          "type": "string"
+        },
+        "is_baseline": {
+          "default": false,
+          "title": "Is Baseline",
+          "type": "boolean"
+        },
+        "params": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Params",
+          "type": "object"
+        },
+        "metrics": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Metrics",
+          "type": "object"
+        },
+        "feasible": {
+          "default": false,
+          "title": "Feasible",
+          "type": "boolean"
+        },
+        "violations": {
+          "default": [],
+          "items": {},
+          "title": "Violations",
+          "type": "array"
+        },
+        "targets_met": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Targets Met",
+          "type": "object"
+        },
+        "worst_case": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Worst Case",
+          "type": "object"
+        },
+        "pareto": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Pareto",
+          "type": "object"
+        },
+        "selected": {
+          "default": false,
+          "title": "Selected",
+          "type": "boolean"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "status_label": {
+          "default": "infeasible",
+          "title": "Status Label",
+          "type": "string"
+        },
+        "role_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Label"
+        },
+        "sweep": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sweep"
+        },
+        "acceptance": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Acceptance"
+        },
+        "files": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Files"
+        },
+        "cad_check": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cad Check"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "design_id"
+      ],
+      "title": "SelectedDesign",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "default": "coldplate-results/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "job_id": {
+      "title": "Job Id",
+      "type": "string"
+    },
+    "engine_version": {
+      "title": "Engine Version",
+      "type": "string"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "completed_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Completed At"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "inputs": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Inputs",
+      "type": "object"
+    },
+    "interpretation": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Interpretation",
+      "type": "object"
+    },
+    "normalized_inputs": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalized Inputs"
+    },
+    "assumptions": {
+      "default": [],
+      "items": {},
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "requirement_conflicts": {
+      "default": [],
+      "items": {},
+      "title": "Requirement Conflicts",
+      "type": "array"
+    },
+    "simulation": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Simulation",
+      "type": "object"
+    },
+    "objectives": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Objectives"
+    },
+    "constraints": {
+      "default": [],
+      "items": {},
+      "title": "Constraints",
+      "type": "array"
+    },
+    "candidates": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/CandidateRecord"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "rejected_candidates": {
+      "default": [],
+      "items": {},
+      "title": "Rejected Candidates",
+      "type": "array"
+    },
+    "pareto": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Pareto",
+      "type": "object"
+    },
+    "selected_designs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SelectedDesign"
+      },
+      "title": "Selected Designs",
+      "type": "array"
+    },
+    "warnings": {
+      "default": [],
+      "items": {},
+      "title": "Warnings",
+      "type": "array"
+    },
+    "links": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Links",
+      "type": "object"
+    }
+  },
+  "required": [
+    "job_id",
+    "engine_version",
+    "created_at",
+    "status",
+    "label"
+  ],
+  "title": "ResultsDoc",
+  "type": "object"
+}

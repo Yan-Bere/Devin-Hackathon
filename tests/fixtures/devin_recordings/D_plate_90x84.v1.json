@@ -1,0 +1,680 @@
+{
+  "fixture": "D_plate_90x84",
+  "prompt_version": "v1",
+  "recorded_at_utc": "2026-10-24T17:59:31.165642+00:00",
+  "structured_output": {
+    "schema_version": "coldplate-extraction/1",
+    "document_title": "ITherm 2027 Cold Plate: Simulation Inputs",
+    "coordinate_frame": {
+      "value": "Origin at lower-left corner of the 52.15 \u00d7 50.30 mm die region; x to the right (width), y upward (height); units mm",
+      "source": "input",
+      "evidence": "Origin is the lower-left corner of the 52.15 \u00d7 50.30 mm die region.",
+      "note": "Axis directions inferred from 'Width (x)', 'Height (y)' columns and map 'bottom'/'left' orientation."
+    },
+    "plate": {
+      "length_x": {
+        "value": 90,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Base plate | 90 \u00d7 84 \u00d7 2.5 mm, rolled copper (C110 assumed, k = 391 W/m\u00b7K), centered on package |",
+        "note": "Assignment of 90 to x and 84 to y assumed from the order used for the die region (x \u00d7 y)."
+      },
+      "width_y": {
+        "value": 84,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Base plate | 90 \u00d7 84 \u00d7 2.5 mm, rolled copper (C110 assumed, k = 391 W/m\u00b7K), centered on package |",
+        "note": "Axis assignment assumed from dimension order."
+      },
+      "thickness": {
+        "value": 2.5,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Base plate | 90 \u00d7 84 \u00d7 2.5 mm, rolled copper (C110 assumed, k = 391 W/m\u00b7K), centered on package |",
+        "note": null
+      },
+      "material": {
+        "value": "rolled copper (C110 assumed)",
+        "source": "input",
+        "evidence": "| Base plate | 90 \u00d7 84 \u00d7 2.5 mm, rolled copper (C110 assumed, k = 391 W/m\u00b7K), centered on package |",
+        "note": "Rolled copper is stated; the C110 grade is marked assumed."
+      },
+      "thermal_conductivity": {
+        "value": 391,
+        "unit": "W/m\u00b7K",
+        "source": "input_flagged_assumption",
+        "evidence": "rolled copper (C110 assumed, k = 391 W/m\u00b7K)",
+        "note": "Tied to assumed C110 grade."
+      },
+      "placement": {
+        "value": "centered on package",
+        "source": "input",
+        "evidence": "| Base plate | 90 \u00d7 84 \u00d7 2.5 mm, rolled copper (C110 assumed, k = 391 W/m\u00b7K), centered on package |",
+        "note": null
+      }
+    },
+    "fin_region": {
+      "length_x": {
+        "value": 56.0,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Fin design space | 56.00 \u00d7 54.00 \u00d7 2.0 mm, centered on package |",
+        "note": "Written as 56.00; axis assignment assumed from dimension order."
+      },
+      "width_y": {
+        "value": 54.0,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Fin design space | 56.00 \u00d7 54.00 \u00d7 2.0 mm, centered on package |",
+        "note": "Written as 54.00."
+      },
+      "height": {
+        "value": 2.0,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Fin design space | 56.00 \u00d7 54.00 \u00d7 2.0 mm, centered on package |",
+        "note": null
+      },
+      "placement": {
+        "value": "centered on package",
+        "source": "input",
+        "evidence": "| Fin design space | 56.00 \u00d7 54.00 \u00d7 2.0 mm, centered on package |",
+        "note": null
+      }
+    },
+    "die_region": {
+      "width_x": {
+        "value": 52.15,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "Origin is the lower-left corner of the 52.15 \u00d7 50.30 mm die region.",
+        "note": null
+      },
+      "height_y": {
+        "value": 50.3,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "Origin is the lower-left corner of the 52.15 \u00d7 50.30 mm die region.",
+        "note": "Written as 50.30."
+      },
+      "placement": {
+        "value": null,
+        "source": "missing",
+        "evidence": null,
+        "note": "Plate and fin space are 'centered on package', but the die region's position relative to the plate is not stated explicitly."
+      }
+    },
+    "heat_sources": [
+      {
+        "name": "GPU1",
+        "type": "GPU",
+        "x0": 0.0,
+        "y0": 10.15,
+        "width": 26.0,
+        "height": 30.0,
+        "length_unit": "mm",
+        "power": 554.4,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| GPU1 | GPU | 0.00 | 10.15 | 26.0 | 30.0 | 554.4 | 71.1 |",
+        "note": "Avg flux 71.1 W/cm\u00b2; non-uniform power map (assumed)."
+      },
+      {
+        "name": "GPU2",
+        "type": "GPU",
+        "x0": 26.15,
+        "y0": 10.15,
+        "width": 26.0,
+        "height": 30.0,
+        "length_unit": "mm",
+        "power": 554.4,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| GPU2 | GPU | 26.15 | 10.15 | 26.0 | 30.0 | 554.4 | 71.1 |",
+        "note": "Avg flux 71.1 W/cm\u00b2; non-uniform power map (assumed)."
+      },
+      {
+        "name": "H1",
+        "type": "HBM",
+        "x0": 0.0,
+        "y0": 40.3,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H1 | HBM | 0.00 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H2",
+        "type": "HBM",
+        "x0": 14.0,
+        "y0": 40.3,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H2 | HBM | 14.00 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H3",
+        "type": "HBM",
+        "x0": 26.15,
+        "y0": 40.3,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H3 | HBM | 26.15 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H4",
+        "type": "HBM",
+        "x0": 40.15,
+        "y0": 40.3,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H4 | HBM | 40.15 | 40.30 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H5",
+        "type": "HBM",
+        "x0": 0.0,
+        "y0": 0.0,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H5 | HBM | 0.00 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H6",
+        "type": "HBM",
+        "x0": 14.0,
+        "y0": 0.0,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H6 | HBM | 14.00 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H7",
+        "type": "HBM",
+        "x0": 26.15,
+        "y0": 0.0,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H7 | HBM | 26.15 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      },
+      {
+        "name": "H8",
+        "type": "HBM",
+        "x0": 40.15,
+        "y0": 0.0,
+        "width": 12.0,
+        "height": 10.0,
+        "length_unit": "mm",
+        "power": 48.0,
+        "power_unit": "W",
+        "source": "input",
+        "evidence": "| H8 | HBM | 40.15 | 0.00 | 12.0 | 10.0 | 48.0 | 40.0 |",
+        "note": "Avg flux 40.0 W/cm\u00b2; uniform."
+      }
+    ],
+    "stated_total_power": {
+      "value": 1492.8,
+      "unit": "W",
+      "source": "input",
+      "evidence": "Total power: **1492.8 W**.",
+      "note": null
+    },
+    "power_map": {
+      "distribution": "non_uniform_file",
+      "file_name": "power_map_W_per_mm2.csv",
+      "file_units": "W/mm^2",
+      "grid_pitch": {
+        "value": 0.5,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "Grid file: `power_map_W_per_mm2.csv`, 0.5 mm pitch.",
+        "note": null
+      },
+      "grid_origin": {
+        "value": "Row 0 is y = 0.25 mm (bottom), column 0 is x = 0.25 mm (left)",
+        "source": "input",
+        "evidence": "Row 0 is y = 0.25 mm (bottom), column 0 is x = 0.25 mm (left).",
+        "note": "Cell-center coordinates."
+      },
+      "stated_peak_flux": {
+        "value": 134,
+        "unit": "W/cm\u00b2",
+        "source": "input_flagged_assumption",
+        "evidence": "Peak flux: about **134 W/cm\u00b2**.",
+        "note": "Approximate; part of the assumed GPU power map."
+      },
+      "uniform_components": [
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H6",
+        "H7",
+        "H8"
+      ],
+      "source": "input_flagged_assumption",
+      "evidence": "**ASSUMPTION:** estimated from the color bands in the competition figure. Relative levels are 2.0 / 2.4 / 4.0 / 6.0 / 7.0",
+      "note": "GPU map non-uniform, hottest at package centerline, each GPU sums to 554.4 W; units inferred from file name; replace with organizers' map if provided. HBM heat spread evenly over each stack."
+    },
+    "temperature_limits": [
+      {
+        "component_type": "GPU",
+        "hard_max": {
+          "value": 100,
+          "unit": "\u00b0C",
+          "source": "input",
+          "evidence": "| GPU max temp | 100 \u00b0C | \u2264 85 \u00b0C | \u2264 80 \u00b0C |",
+          "note": null
+        },
+        "target_max": {
+          "value": 85,
+          "unit": "\u00b0C",
+          "source": "input",
+          "evidence": "| GPU max temp | 100 \u00b0C | \u2264 85 \u00b0C | \u2264 80 \u00b0C |",
+          "note": null
+        },
+        "stretch_max": {
+          "value": 80,
+          "unit": "\u00b0C",
+          "source": "input",
+          "evidence": "| GPU max temp | 100 \u00b0C | \u2264 85 \u00b0C | \u2264 80 \u00b0C |",
+          "note": null
+        }
+      },
+      {
+        "component_type": "HBM",
+        "hard_max": {
+          "value": 70,
+          "unit": "\u00b0C",
+          "source": "input",
+          "evidence": "| HBM max temp | 70 \u00b0C | \u2264 63 \u00b0C | \u2264 60 \u00b0C |",
+          "note": null
+        },
+        "target_max": {
+          "value": 63,
+          "unit": "\u00b0C",
+          "source": "input",
+          "evidence": "| HBM max temp | 70 \u00b0C | \u2264 63 \u00b0C | \u2264 60 \u00b0C |",
+          "note": null
+        },
+        "stretch_max": {
+          "value": 60,
+          "unit": "\u00b0C",
+          "source": "input",
+          "evidence": "| HBM max temp | 70 \u00b0C | \u2264 63 \u00b0C | \u2264 60 \u00b0C |",
+          "note": null
+        }
+      }
+    ],
+    "critical_component": {
+      "value": "HBM",
+      "source": "input",
+      "evidence": "HBM is the binding limit. Check every stack and report the hottest one.",
+      "note": null
+    },
+    "coolant": {
+      "fluid": {
+        "value": "Water",
+        "source": "input_flagged_assumption",
+        "evidence": "| Fluid (**ASSUMPTION**) | Water |",
+        "note": null
+      },
+      "density": {
+        "value": 997,
+        "unit": "kg/m\u00b3",
+        "source": "input",
+        "evidence": "| Density | 997 kg/m\u00b3 |",
+        "note": null
+      },
+      "specific_heat": {
+        "value": 4180,
+        "unit": "J/kg\u00b7K",
+        "source": "input",
+        "evidence": "| cp | 4180 J/kg\u00b7K |",
+        "note": null
+      },
+      "dynamic_viscosity": {
+        "value": 0.000797,
+        "unit": "Pa\u00b7s",
+        "source": "input",
+        "evidence": "| Viscosity at 30 \u00b0C | 7.97 \u00d7 10\u207b\u2074 Pa\u00b7s |",
+        "note": "Written as 7.97 \u00d7 10\u207b\u2074 Pa\u00b7s, at 30 \u00b0C."
+      },
+      "thermal_conductivity": {
+        "value": 0.615,
+        "unit": "W/m\u00b7K",
+        "source": "input",
+        "evidence": "| Thermal conductivity | 0.615 W/m\u00b7K |",
+        "note": null
+      },
+      "inlet_temperature": {
+        "value": 30,
+        "unit": "\u00b0C",
+        "source": "input_flagged_assumption",
+        "evidence": "| Inlet temp, nominal (**ASSUMPTION**) | 30 \u00b0C |",
+        "note": "Document says to confirm inlet temperature in official rules."
+      },
+      "inlet_temperature_sweep": {
+        "values": [
+          20,
+          25,
+          30,
+          35
+        ],
+        "unit": "\u00b0C",
+        "source": "input",
+        "evidence": "| Inlet temp sweep | 20, 25, 30, 35 \u00b0C |",
+        "note": null
+      },
+      "flow_rate": {
+        "value": 2.0,
+        "unit": "L/min",
+        "source": "input_flagged_assumption",
+        "evidence": "| Flow, nominal (**ASSUMPTION**) | 2.0 L/min |",
+        "note": "0.528 gpm per flow sweep table."
+      },
+      "flow_rate_sweep": {
+        "values": [
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0
+        ],
+        "unit": "L/min",
+        "source": "input",
+        "evidence": "| Flow (L/min) | Flow (gpm) | Bulk water temp rise (K) |",
+        "note": "gpm: 0.264, 0.396, 0.528, 0.660, 0.793. Bulk temp rise (K): 21.49, 14.33, 10.75, 8.60, 7.16."
+      },
+      "max_outlet_temperature_rise": {
+        "value": 12,
+        "unit": "K",
+        "source": "input",
+        "evidence": "Coolant outlet should stay within **12 K** of inlet.",
+        "note": null
+      }
+    },
+    "flow": {
+      "arrangement": "split_edges_to_center",
+      "flow_axis": "unspecified",
+      "inlet": {
+        "value": "along the two outer edges",
+        "source": "input",
+        "evidence": "Coolant enters along the two outer edges, flows through the fins toward the centerline, and exits through the center outlet over the GPU hotspots.",
+        "note": "Which pair of edges (x or y) is not stated."
+      },
+      "outlet": {
+        "value": "center outlet over the GPU hotspots",
+        "source": "input",
+        "evidence": "Coolant enters along the two outer edges, flows through the fins toward the centerline, and exits through the center outlet over the GPU hotspots.",
+        "note": null
+      },
+      "source": "input",
+      "evidence": "**Flow path:** split flow. Coolant enters along the two outer edges, flows through the fins toward the centerline",
+      "note": "Flow path diagram in itherm_layout.png (not available as text). A silicone gasket, 3 mm thick, seals the top of the fin plate to prevent bypass."
+    },
+    "manufacturing": {
+      "min_feature": {
+        "value": 0.1,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Min feature | 0.1 mm |",
+        "note": null
+      },
+      "max_feature": {
+        "value": 0.5,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "| Max feature | 0.5 mm |",
+        "note": null
+      },
+      "xy_resolution": {
+        "value": 33.33,
+        "unit": "\u00b5m",
+        "source": "input",
+        "evidence": "| Resolution | 33.33 \u00b5m (XY), 30 \u00b5m (Z) |",
+        "note": null
+      },
+      "z_resolution": {
+        "value": 30,
+        "unit": "\u00b5m",
+        "source": "input",
+        "evidence": "| Resolution | 33.33 \u00b5m (XY), 30 \u00b5m (Z) |",
+        "note": null
+      },
+      "min_overhang_angle": {
+        "value": 20,
+        "unit": "\u00b0",
+        "source": "input",
+        "evidence": "| Min overhang angle | 20\u00b0 |",
+        "note": null
+      },
+      "process": {
+        "value": null,
+        "source": "missing",
+        "evidence": null,
+        "note": "Manufacturing process not named; 'machined prototypes' mentioned only in context of CFD disagreement."
+      }
+    },
+    "baseline_design": {
+      "fin_type": {
+        "value": "straight fins",
+        "source": "input",
+        "evidence": "Run a plain straight-fin plate first to check the solver before optimizing:",
+        "note": "Flow from both edges to the center."
+      },
+      "fin_thickness": {
+        "value": 0.3,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "- 0.3 mm fins, 0.3 mm gaps, 2 mm tall",
+        "note": null
+      },
+      "channel_width": {
+        "value": 0.3,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "- 0.3 mm fins, 0.3 mm gaps, 2 mm tall",
+        "note": null
+      },
+      "fin_height": {
+        "value": 2,
+        "unit": "mm",
+        "source": "input",
+        "evidence": "- 0.3 mm fins, 0.3 mm gaps, 2 mm tall",
+        "note": null
+      }
+    },
+    "tim": {
+      "area_resistance": {
+        "value": 0.05,
+        "unit": "cm\u00b2\u00b7K/W",
+        "source": "input_flagged_assumption",
+        "evidence": "| TIM (**ASSUMPTION**) | R\u2033 = 0.05 cm\u00b2\u00b7K/W, 0.05 mm thick |",
+        "note": null
+      },
+      "thickness": {
+        "value": 0.05,
+        "unit": "mm",
+        "source": "input_flagged_assumption",
+        "evidence": "| TIM (**ASSUMPTION**) | R\u2033 = 0.05 cm\u00b2\u00b7K/W, 0.05 mm thick |",
+        "note": null
+      }
+    },
+    "pressure_drop": {
+      "hard_limit": {
+        "value": 27.6,
+        "unit": "kPa",
+        "source": "input",
+        "evidence": "| Pressure drop | 4.0 psi (27.6 kPa) | \u2264 2.0 psi (13.8 kPa) | \u2264 1.0 psi (6.9 kPa) |",
+        "note": "Also given as 4.0 psi."
+      },
+      "design_target": {
+        "value": 13.8,
+        "unit": "kPa",
+        "source": "input",
+        "evidence": "| Pressure drop | 4.0 psi (27.6 kPa) | \u2264 2.0 psi (13.8 kPa) | \u2264 1.0 psi (6.9 kPa) |",
+        "note": "Also given as \u2264 2.0 psi."
+      },
+      "stretch_goal": {
+        "value": 6.9,
+        "unit": "kPa",
+        "source": "input",
+        "evidence": "| Pressure drop | 4.0 psi (27.6 kPa) | \u2264 2.0 psi (13.8 kPa) | \u2264 1.0 psi (6.9 kPa) |",
+        "note": "Also given as \u2264 1.0 psi."
+      },
+      "acceptance_limit": {
+        "value": 24.1,
+        "unit": "kPa",
+        "source": "input",
+        "evidence": "Reject any design above **3.5 psi (24.1 kPa)** at the highest test flow.",
+        "note": "Also given as 3.5 psi; margin for 10 to 15% CFD vs. prototype disagreement."
+      },
+      "acceptance_condition": {
+        "value": "at the highest test flow",
+        "source": "input",
+        "evidence": "Reject any design above **3.5 psi (24.1 kPa)** at the highest test flow.",
+        "note": null
+      }
+    },
+    "acceptance": {
+      "temperature_margin": {
+        "value": 5,
+        "unit": "K",
+        "source": "input",
+        "evidence": "Reject any design within **5 K** of a temperature hard limit at the worst sweep point (highest inlet temp, lowest flow).",
+        "note": null
+      },
+      "worst_case_condition": {
+        "value": "worst sweep point (highest inlet temp, lowest flow)",
+        "source": "input",
+        "evidence": "Reject any design within **5 K** of a temperature hard limit at the worst sweep point (highest inlet temp, lowest flow).",
+        "note": null
+      }
+    },
+    "objectives": [
+      {
+        "metric": "pressure_drop",
+        "direction": "minimize",
+        "description": "Lower pressure drop scores better; report \u0394P at every flow point.",
+        "source": "input",
+        "evidence": "Lower pressure drop scores better, so report \u0394P at every flow point."
+      },
+      {
+        "metric": "max_hbm_temperature",
+        "direction": "minimize",
+        "description": "HBM is the binding limit; report hottest stack against 70 \u00b0C hard / 63 \u00b0C target / 60 \u00b0C stretch.",
+        "source": "input",
+        "evidence": "HBM is the binding limit. Check every stack and report the hottest one."
+      }
+    ],
+    "assumptions": [
+      {
+        "field": "power_map",
+        "statement": "GPU power map estimated from color bands in competition figure; relative levels 2.0/2.4/4.0/6.0/7.0, hottest at package centerline; each GPU sums to 554.4 W.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "power_map.stated_peak_flux",
+        "statement": "Peak flux about 134 W/cm\u00b2 (part of assumed map).",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "plate.thermal_conductivity",
+        "statement": "C110 copper assumed, k = 391 W/m\u00b7K.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "tim.area_resistance",
+        "statement": "TIM R\u2033 = 0.05 cm\u00b2\u00b7K/W.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "tim.thickness",
+        "statement": "TIM 0.05 mm thick.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "coolant.fluid",
+        "statement": "Coolant is water.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "coolant.inlet_temperature",
+        "statement": "Nominal inlet 30 \u00b0C; confirm in official rules.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "coolant.flow_rate",
+        "statement": "Nominal flow 2.0 L/min.",
+        "source": "input_flagged_assumption"
+      },
+      {
+        "field": "plate.length_x",
+        "statement": "Plate and fin-space dimensions assumed listed in x \u00d7 y order (90/56 along x, 84/54 along y), matching the die-region convention.",
+        "source": "assumed"
+      }
+    ],
+    "missing_fields": [
+      {
+        "field": "flow.flow_axis",
+        "reason": "Document does not state which pair of outer edges is the inlet (x or y axis); only in the referenced image.",
+        "essential": false
+      },
+      {
+        "field": "die_region.placement",
+        "reason": "Die region position relative to plate/fin space not explicitly stated (plate and fins are 'centered on package').",
+        "essential": false
+      },
+      {
+        "field": "manufacturing.process",
+        "reason": "Fabrication process not named.",
+        "essential": false
+      }
+    ]
+  },
+  "session": {
+    "session_id": "devin-6dc4b52798e84310ab355fba8622d6e7",
+    "url": "https://app.devin.ai/sessions/6dc4b52798e84310ab355fba8622d6e7",
+    "kind": "initial",
+    "status": "running",
+    "status_detail": "waiting_for_user",
+    "acus_consumed": null,
+    "elapsed_s": 92.89100000000326
+  }
+}
