@@ -135,6 +135,7 @@ def test_finalize_incomplete_and_full_happy_path(tmp_path):
     ]
     assert session.confirm_defaults(defaults, "I confirm the proposed values").ok
     assert session.acknowledge_warning("C5", "I acknowledge C5.").ok
+    assert session.acknowledge_warning("C7", "I acknowledge C7.").ok
     assert session.is_complete()
     assert session.finalize("finalize").ok
     final_document = json.loads((session.dir / "requirements_final.json").read_text())

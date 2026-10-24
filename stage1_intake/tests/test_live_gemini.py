@@ -42,12 +42,11 @@ def test_gemini_intake_conversation(tmp_path):
             if digest["awaiting_final_confirmation"]:
                 message = "yes"
             elif not digest["presented_fields"] and any(
-                check["id"] == "C5"
-                and check["level"] == "warning"
+                check["level"] == "warning"
                 and not check["acknowledged"]
                 for check in digest["failing_checks"]
             ):
-                message = "I acknowledge the C5 coolant-rise warning."
+                message = "I acknowledge the C5 coolant-rise and C7 headroom warnings."
             else:
                 message = "Yes, use those."
             exchange(message)
@@ -69,6 +68,7 @@ def test_gemini_intake_conversation(tmp_path):
     assert "Use 2 L/min nominal, 30 C inlet, sweep flow only at 30 C." in notes
     assert "Actually make the TIM 0.08 cm2K/W." in notes
     assert "ACKNOWLEDGE C5" in notes
+    assert "ACKNOWLEDGE C7" in notes
     final_document = json.loads(
         (session.dir / "requirements_final.json").read_text(encoding="utf-8")
     )

@@ -16,13 +16,16 @@ def test_preset_defaults_have_expected_check_levels_and_messages():
     values = _values()
     results = {result.id: result for result in checks.run_checks(values)}
 
-    for check_id in ("C1", "C2", "C3", "C4", "C7", "C8"):
+    for check_id in ("C1", "C2", "C3", "C4", "C8"):
         assert results[check_id].level == "ok"
     assert results["C5"].level == "warning"
     assert "1 L/min → 21.5 K" in results["C5"].message
     assert "1.5 L/min → 14.3 K" in results["C5"].message
     assert "2 L/min" not in results["C5"].message
     assert results["C6"].level == "info"
+    assert results["C7"].level == "warning"
+    assert "8.5 K of headroom" in results["C7"].message
+    assert "likely infeasible" in results["C7"].message
 
 
 def test_pressure_rule_resolves_c6():
@@ -84,7 +87,14 @@ def test_c7_inlet_sweep_uses_worst_inlet_unless_flow_sweep_mode():
     assert "66.5" in result.message
 
     values["sweep_mode"] = "flow_sweep_at_nominal_temp"
-    assert _result(values, "C7").level == "ok"
+    result = _result(values, "C7")
+    assert result.level == "warning"
+    assert "13.5 K of headroom" in result.message
+
+    values["flow_sweep"] = [2.0, 3.0]
+    result = _result(values, "C7")
+    assert result.level == "ok"
+    assert "24.3 K of headroom" in result.message
 
 
 def test_c5_respects_maximum_coolant_rise():

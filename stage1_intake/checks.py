@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 TOL = 1e-6
+C7_MIN_HEADROOM = 15.0
 
 
 @dataclass
@@ -152,10 +153,10 @@ def _c7(v):
     t_in, q = max(inlets), min(flows)
     t_out = t_in + _bulk_rise(power, q, props)
     threshold = hbm - margin
-    if t_out >= threshold - TOL:
-        return CheckResult("C7", "warning", f"At the worst point ({t_in:g} °C inlet, {q:g} L/min) the coolant outlet reaches {t_out:.1f} °C, at or above the HBM limit minus margin ({threshold:g} °C); this operating point is likely infeasible for any design.")
-    return CheckResult("C7", "ok", f"Worst-point coolant outlet {t_out:.1f} °C is below {threshold:g} °C ({t_in:g} °C inlet, {q:g} L/min).")
-
+    headroom = threshold - t_out
+    if headroom < C7_MIN_HEADROOM - TOL:
+        return CheckResult("C7", "warning", f"At the worst point ({t_in:g} °C inlet, {q:g} L/min) the coolant outlet reaches {t_out:.1f} °C, leaving only {headroom:.1f} K of headroom below the HBM limit minus margin ({threshold:g} °C). The chip runs hotter than the coolant, so under {C7_MIN_HEADROOM:g} K of headroom this point is likely infeasible.")
+    return CheckResult("C7", "ok", f"Worst-point coolant outlet {t_out:.1f} °C leaves {headroom:.1f} K of headroom below {threshold:g} °C ({t_in:g} °C inlet, {q:g} L/min).")
 
 def _c8(v):
     rows = _sources(v)

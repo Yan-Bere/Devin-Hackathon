@@ -104,6 +104,9 @@ def _complete_session(tmp_path):
     assert session.acknowledge_warning(
         "C5", "I acknowledge the C5 coolant-rise warning."
     ).ok
+    assert session.acknowledge_warning(
+        "C7", "I acknowledge the C7 headroom warning."
+    ).ok
     assert session.is_complete()
     return session
 
@@ -237,7 +240,9 @@ def test_scripted_happy_path_records_inputs_confirms_groups_and_finalizes(tmp_pa
     assert "⚠️ C5 (warning):" in summary_reply
     assert "Warnings need your explicit acknowledgement" in summary_reply
     assert session.summary_text() not in summary_reply
+    assert "⚠️ C7 (warning):" in summary_reply
     assert session.acknowledge_warning("C5", warning_quote).ok
+    assert session.acknowledge_warning("C7", warning_quote).ok
     summary_reply = intake_agent.handle(warning_quote)
 
     assert intake_agent.digest()["complete"] is True
@@ -458,8 +463,7 @@ def test_mock_provider_end_to_end_completes_preset_intake(tmp_path):
         if digest["awaiting_final_confirmation"]:
             message = "yes"
         elif not digest["presented_fields"] and any(
-            check["id"] == "C5"
-            and check["level"] == "warning"
+            check["level"] == "warning"
             and not check["acknowledged"]
             for check in digest["failing_checks"]
         ):
@@ -658,7 +662,14 @@ def test_unacknowledged_c5_blocks_finalization_until_explicit_acknowledgement(tm
                             "check_id": "C5",
                             "user_quote": "I acknowledge C5.",
                         },
-                    )
+                    ),
+                    _tool(
+                        "acknowledge_warning",
+                        {
+                            "check_id": "C7",
+                            "user_quote": "I acknowledge C5.",
+                        },
+                    ),
                 ],
             ),
             llm.LLMTurn(text="C5 is acknowledged.", tool_calls=[]),
