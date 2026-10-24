@@ -169,8 +169,9 @@ function renderStats() {
   const s = state.summary;
   if (!s) return;
   const done = s.completed + s.failed;
-  $("stat-progress").textContent = s.budget ? `${done} / ${s.budget} runs` : `${done} runs`;
-  $("stat-progress-bar").style.width = s.budget ? `${Math.min(100, (100 * done) / s.budget)}%` : "0";
+  const budget = Math.max(s.budget || 0, s.total || 0);
+  $("stat-progress").textContent = budget ? `${done} / ${budget} runs` : `${done} runs`;
+  $("stat-progress-bar").style.width = budget ? `${Math.min(100, (100 * done) / budget)}%` : "0";
   $("stat-running").textContent = s.running;
   $("stat-failed").textContent = s.failed;
   $("stat-pareto").textContent = s.pareto_ids.length;
@@ -182,7 +183,7 @@ function renderStats() {
   $("stat-best-t-id").textContent = bestT ? bestT.id : "";
   $("stat-best-dp-wrap").onclick = bestDp ? () => openModal(bestDp.id) : null;
   $("stat-best-t-wrap").onclick = bestT ? () => openModal(bestT.id) : null;
-  const finished = s.budget && done >= s.budget;
+  const finished = budget && done >= budget;
   $("stat-eta").textContent = finished ? "Done" : fmtDuration(s.eta_s);
   $("stat-avg").textContent = s.avg_runtime_s ? `avg ${fmtDuration(s.avg_runtime_s)} / run` : "";
 }
@@ -654,3 +655,17 @@ renderPareto = function () {
   if (tl) Plotly.relayout("pareto-plot", { "yaxis.title": tl });
 };
 pollCampaign();
+
+// Download the CAD (STL) of every run that has geometry (the 5 selected designs).
+document.getElementById("download-cad")?.addEventListener("click", async () => {
+  const withCad = [...state.runs.values()].filter((r) => r.has_geometry);
+  if (!withCad.length) { alert("No CAD yet: wait for the 'Exporting CAD' step to finish."); return; }
+  for (const r of withCad) {
+    const role = (r.details && r.details.role) || "design";
+    const a = document.createElement("a");
+    a.href = `/api/runs/${encodeURIComponent(r.id)}/geometry`;
+    a.download = `${r.id}_${role}.stl`;
+    document.body.appendChild(a); a.click(); a.remove();
+    await new Promise((res) => setTimeout(res, 400));
+  }
+});
