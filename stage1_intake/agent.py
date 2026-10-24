@@ -8,7 +8,6 @@ import re
 import llm
 import schema
 import state as intake_state
-import units
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -181,15 +180,7 @@ class Agent:
         field_state = self.session.fields[item.id]
         if field_state.status in {"missing", "not_applicable"}:
             return "MISSING"
-        value = field_state.value
-        if item.type == "table":
-            total_power = sum(row.get("power_W", 0) for row in (value or []))
-            return f"{len(value)} rows, {total_power:g} W"
-        if item.type in {"float", "int"}:
-            return units.format_value(value, item.unit)
-        if isinstance(value, (dict, list)):
-            return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-        return str(value)
+        return self.session._display_value(item, field_state)
 
     def digest(self):
         result = self.session.digest()
@@ -259,6 +250,22 @@ class Agent:
             + json.dumps(digest, indent=1, ensure_ascii=False)
         )
 
+    def _history_window(self, limit: int = 40) -> list[dict]:
+        window = self.history[-limit:]
+        while window and window[0].get("role") != "user":
+            window = window[1:]
+        if window:
+            return window
+        last_user = next(
+            (
+                index
+                for index in range(len(self.history) - 1, -1, -1)
+                if self.history[index].get("role") == "user"
+            ),
+            None,
+        )
+        return self.history[last_user:] if last_user is not None else []
+
     def _run_turn(self, user_text, synthetic):
         history_start = len(self.history)
         self.turn_mutated = False
@@ -276,7 +283,7 @@ class Agent:
             try:
                 turn = self.provider.generate(
                     self._system_with_digest(digest),
-                    self.history[-40:],
+                    self._history_window(),
                     TOOLS,
                     digest,
                 )

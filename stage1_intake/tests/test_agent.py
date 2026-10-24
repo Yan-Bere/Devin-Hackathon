@@ -35,6 +35,61 @@ def _next_opening(system, history, digest):
     return llm.LLMTurn(text=llm.render_group(digest), tool_calls=[])
 
 
+def test_history_window_starts_at_first_user_and_falls_back_to_last_user(tmp_path):
+    intake_agent = agent.Agent(
+        state.Session(base_dir=tmp_path),
+        llm.ScriptedProvider([]),
+    )
+    history = [
+        {"role": ("user", "assistant", "tool")[index % 3], "text": str(index)}
+        for index in range(45)
+    ]
+    assert history[-40]["role"] == "tool"
+    intake_agent.history = history
+
+    window = intake_agent._history_window()
+
+    assert window[0]["role"] == "user"
+    assert window[-1] == history[-1]
+
+    history = [{"role": "user", "text": "earlier"}] + [
+        {"role": "tool"} for _ in range(40)
+    ]
+    intake_agent.history = history
+    window = intake_agent._history_window()
+    assert window[0] == history[0]
+    assert window[-1] == history[-1]
+
+
+def test_provider_history_starts_with_user_in_long_conversation(tmp_path):
+    class RecordingProvider:
+        def __init__(self):
+            self.histories = []
+
+        def generate(self, system, history, tools, digest):
+            assert history
+            assert history[0]["role"] == "user"
+            self.histories.append(list(history))
+            return llm.LLMTurn(
+                text="",
+                tool_calls=[_tool("unknown", {})],
+            )
+
+    provider = RecordingProvider()
+    intake_agent = agent.Agent(
+        state.Session(base_dir=tmp_path),
+        provider,
+        max_tool_rounds=8,
+    )
+
+    for turn in range(3):
+        intake_agent.handle(f"conversation turn {turn}")
+
+    assert len(intake_agent.history) > 40
+    assert provider.histories
+    assert all(history[0]["role"] == "user" for history in provider.histories)
+
+
 def _complete_session(tmp_path):
     session = state.Session(base_dir=tmp_path)
     assert session.load_preset(PRESET).ok
@@ -446,6 +501,45 @@ def test_digest_includes_optional_open_fields_and_summary_text(tmp_path):
     assert "Pressure-drop hard limit:" in summary
     assert "Heat sources: 10 rows, 1492.8 W" in summary
     assert "Checks: C5 (warning):" in summary
+
+
+def test_digest_uses_session_display_formatting_for_vectors_and_lists(tmp_path):
+    session = state.Session(base_dir=tmp_path)
+    assert session.load_preset(PRESET).ok
+    assert session.set_field("dp_over_limit_rule", "penalty").ok
+    assert session.set_field("sweep_mode", "full_grid").ok
+    intake_agent = agent.Agent(session, llm.MockProvider())
+
+    for group_number in range(1, 6):
+        digest = intake_agent.digest()
+        assert digest["next_group"] == group_number
+        if group_number == 2:
+            die_region = next(
+                item
+                for item in digest["next_group_fields"]
+                if item["id"] == "die_region_size"
+            )
+            assert die_region["value_display"] == "52.15 × 50.3 mm"
+            assert die_region["value_display"].count("mm") == 1
+        proposed_ids = [
+            item["id"]
+            for item in digest["next_group_fields"]
+            if item["status"] == "default_proposed"
+        ]
+        assert session.confirm_defaults(
+            proposed_ids,
+            user_quote="Yes, use these.",
+        ).ok
+
+    digest = intake_agent.digest()
+    assert digest["next_group"] == 6
+    design_families = next(
+        item
+        for item in digest["next_group_fields"]
+        if item["id"] == "design_families"
+    )
+    assert design_families["value_display"] == "straight_fins, staggered_pins"
+    assert "[" not in design_families["value_display"]
 
 
 @pytest.mark.parametrize(
