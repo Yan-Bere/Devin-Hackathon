@@ -1,4 +1,13 @@
-# Cold-plate optimization engine
+# Devin-Hackathon: ITherm 2027 cold-plate tools
+
+| Component | Path | Purpose |
+|---|---|---|
+| Cold-plate optimization engine | repo root (`coldplate/`, `frontend/`, `prompts/`, `tests/`) | Requirements markdown → Devin API → CAD → low-fidelity thermal/hydraulic model → Pareto results, API and dashboard bundle |
+| Requirements intake chatbot | `stage1_intake/` | Gradio chatbot that collects and validates simulation inputs |
+| Stage-2 straight-fin optimizer | `stage2_optimizer/` | Reduced-order straight-fin optimizer with CAD export |
+| CFD dashboard prototype | `cfd-dashboard/` | Live CFD optimization dashboard (see `cfd-dashboard/README.md`) |
+
+## Cold-plate optimization engine
 
 Hackathon engine that turns a requirements document into Pareto-optimal
 cold-plate channel designs: **requirements.md → Devin API → structured inputs →
@@ -7,7 +16,7 @@ CAD → low-fidelity thermal/hydraulic model → Pareto front**.
 All numeric results are **low-fidelity reduced-order estimates — not validated
 3D CFD**. Every output carries that label.
 
-## Setup
+### Setup
 
 Prereqs: Python 3.12, `uv`, Node 24 / npm 11 (frontend only).
 
@@ -17,7 +26,7 @@ uv venv --python 3.12 .venv
 uv pip install -e ".[dev]" --python .venv/Scripts/python.exe
 ```
 
-## Devin credentials
+### Devin credentials
 
 The engine's only AI provider is our Devin subscription, called from the backend.
 Copy the template and fill it in. `.env` is git-ignored; never commit it.
@@ -46,7 +55,7 @@ sessions draw on the plan's quota (no separate API allowance). It also lists how
 the engine limits consumption: a parse cache keyed by document hash, at most one
 repair message, and sessions terminated as soon as a result is accepted.
 
-## Run the API
+### Run the API
 
 ```bash
 # Git Bash / PowerShell
@@ -56,7 +65,7 @@ repair message, and sessions terminated as soon as a result is accepted.
 Endpoints per `docs/API_CONTRACT.md` (`POST /api/optimize`, `GET /api/jobs/{id}`,
 `GET /api/results/{id}`, designs/files/schema/health).
 
-## Run the frontend harness
+### Run the frontend harness
 
 ```bash
 cd frontend
@@ -73,7 +82,7 @@ its metrics, acceptance verdict and STEP/STL/GLB/fields links. This is a test
 harness only. The production Pareto-front dashboard is a separate component that
 consumes the API/bundle described below.
 
-## Run the demo
+### Run the demo
 
 ```bash
 # recorded replay (no Devin quota):
@@ -84,7 +93,7 @@ consumes the API/bundle described below.
 .venv/Scripts/python.exe scripts/run_demo.py --parser recorded --export-sample
 ```
 
-## Tests
+### Tests
 
 ```bash
 .venv/Scripts/python.exe -m pytest -q                 # offline, ~4 min
@@ -95,7 +104,7 @@ consumes the API/bundle described below.
 Prompt eval reports land in `prompts/requirements_parser/eval/`; see
 `prompts/requirements_parser/EVAL.md`.
 
-## Outputs for the dashboard team
+### Outputs for the dashboard team
 
 Each job writes a self-contained bundle under `runs/jobs/<job_id>/`
 (manifest.json, results.json, candidates.csv, interpretation.json, inputs/,
@@ -105,7 +114,7 @@ Contract: `docs/API_CONTRACT.md`; results JSON Schema: `docs/results.schema.json
 Pareto component lives in `frontend/src/pareto/` and is exported from
 `frontend/src/index.ts`.
 
-## Model and limitations
+### Model and limitations
 
 `coldplate-rom/1` is a reduced-order model. Results are labelled low-fidelity everywhere
 and are not validated 3D CFD.
@@ -135,7 +144,7 @@ and are not validated 3D CFD.
   outlet, and HBM rows are graded at 30–50 W/cm². The engine warns about both discrepancies
   whenever the file is supplied. `scripts/build_itherm_power_map.py` regenerates it.
 
-## Reproducible demonstration
+### Reproducible demonstration
 
 Live end-to-end (verified 2026-10-24). With the API running, `run_demo.py --parser devin
 --no-cache` uploaded `tests/fixtures/A_canonical.md` plus the reference CSV. A fresh Devin
@@ -154,7 +163,7 @@ reproduces these numbers without spending quota:
 - `requirement_conflicts`: bulk rise exceeds 12 K at 1.0 L/min (21.49 K) for any
   geometry; minimum compliant flow 1.79 L/min
 
-## Repository layout
+### Repository layout
 
 ```
 coldplate/       engine: devin_client, parser, normalize, units, power_map,
@@ -166,4 +175,47 @@ tests/           offline suite (+ fixtures, golden extraction, Devin recordings)
 frontend/        Vite+React+TS Pareto harness (reusable ParetoChart component)
 docs/            API_CONTRACT.md, results.schema.json, DEVIN_API.md
 runs/            git-ignored: jobs bundles, parse cache, scratch, smoke records
+```
+
+## Requirements intake chatbot (`stage1_intake/`)
+
+`stage1_intake/` is a Gradio chatbot that collects and validates the inputs for a
+cold-plate simulation. It writes `requirements_final.json` for a later optimizer
+stage, which is not implemented here.
+
+- Python owns the field list, unit conversion, validation and checks C1–C8; the LLM
+  only phrases questions and extracts values via tool calls.
+- Defaults are never confirmed silently: each group is confirmed explicitly, and
+  warnings (e.g. C5 coolant rise) must be acknowledged before finalizing.
+- Each session writes `sessions/<id>/requirements.json` and `notes.txt` (with the
+  user's exact quotes) as it goes, and `requirements_final.json` once finalized.
+
+### Run
+
+```bash
+cd stage1_intake
+uv venv --python 3.11 .venv          # or: python3.11 -m venv .venv
+uv pip install -r requirements.txt   # or: .venv/bin/pip install -r requirements.txt
+cp .env.example .env                 # then paste your GEMINI_API_KEY into .env
+.venv/bin/python app.py              # open http://127.0.0.1:7860
+```
+
+Without a key (or with `--provider mock`) it runs a scripted mock bot that only
+understands "yes" and choice names.
+
+### Demo script
+
+1. Click **Load ITherm 2027 preset**.
+2. `Yes those limits are right, but over 4 psi is a penalty, not disqualification.`
+3. `Use 2 L/min nominal, 30 C inlet, sweep flow only at 30 C.`
+4. `Actually make the TIM 0.08 cm2K/W.`
+5. `Yes, use those.` for each remaining group.
+6. Acknowledge the C5 coolant-rise warning, then `yes` on the final summary.
+
+### Tests
+
+```bash
+cd stage1_intake
+.venv/bin/python -m pytest -q                  # offline, mock LLM
+RUN_LIVE=1 .venv/bin/python -m pytest -q tests/test_live_gemini.py   # real Gemini
 ```
