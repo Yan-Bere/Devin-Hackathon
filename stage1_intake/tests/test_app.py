@@ -1,3 +1,4 @@
+from pathlib import Path
 import gradio as gr
 import pandas as pd
 
@@ -29,14 +30,12 @@ def test_build_app_constructs_gradio_six_messages_ui():
         for component in demo.blocks.values()
     )
     assert "From competition specs to an optimized" in app.ui_style.header_html()
-    assert any(
-        isinstance(component, gr.ScatterPlot)
+    image_labels = {
+        component.label
         for component in demo.blocks.values()
-    )
-    assert any(
-        isinstance(component, gr.Model3D)
-        for component in demo.blocks.values()
-    )
+        if isinstance(component, gr.Image)
+    }
+    assert {"Pareto candidates", "Optimized cold plate (STL render)"} <= image_labels
     assert any(
         getattr(component, "value", None) == "Optimize"
         and not component.interactive
@@ -242,9 +241,9 @@ def test_optimize_handler_yields_progress_and_results(tmp_path, monkeypatch):
     assert "No feasible design found" in results[1][1]
     assert "Coolant outlet rise" in results[1][1]
     assert isinstance(results[1][2], pd.DataFrame)
-    assert isinstance(results[1][3], pd.DataFrame)
-    assert {"baseline", "optimum"} <= set(results[1][3]["kind"])
-    assert results[1][4] == fake_result["files"]["stl_path"]
+    assert results[1][3].endswith("pareto.png")
+    assert Path(results[1][3]).exists()
+    assert results[1][4] is None
     assert results[1][5] == [
         fake_result["files"]["step_path"],
         fake_result["files"]["stl_path"],

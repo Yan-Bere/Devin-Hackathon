@@ -12,6 +12,7 @@ import agent as intake_agent
 import llm
 import schema
 import state as intake_state
+import plots
 import ui_style
 
 
@@ -277,11 +278,18 @@ def _pareto_frame(result):
     return pd.DataFrame(rows, columns=PARETO_COLUMNS)
 
 
+def _render(fn, source, path):
+    try:
+        return fn(source, path)
+    except Exception:
+        return None
+
+
 def on_optimize(agent_state, runner=None):
     finalized = bool(
         agent_state is not None and agent_state.session.finalized
     )
-    empty_pareto = pd.DataFrame(columns=PARETO_COLUMNS)
+    empty_pareto = None
     if not finalized:
         yield (
             "Optimize is available after requirements are finalized.",
@@ -305,6 +313,7 @@ def on_optimize(agent_state, runner=None):
     )
     try:
         run_optimizer = runner or _run_optimizer
+        out_dir = agent_state.session.dir
         result = run_optimizer(
             agent_state.session.dir / "requirements_final.json"
         )
@@ -328,8 +337,8 @@ def on_optimize(agent_state, runner=None):
             status,
             _optimizer_summary(result),
             pd.DataFrame(_sweep_rows(result)),
-            _pareto_frame(result),
-            result["files"].get("stl_path"),
+            _render(plots.pareto_png, result, out_dir / "pareto.png"),
+            _render(plots.plate_png, result["files"].get("stl_path"), out_dir / "plate.png"),
             files,
             gr.update(interactive=True),
         )
@@ -410,33 +419,18 @@ def build_app(provider_name=None):
                         interactive=False,
                         label="Operating-point sweep",
                     )
-                    pareto_plot = gr.ScatterPlot(
-                        value=pd.DataFrame(columns=PARETO_COLUMNS),
-                        x="delta_p_nominal_kPa",
-                        y="T_hbm_max_C",
-                        color="kind",
-                        color_map={
-                            "candidate (feasible)": "#22D3EE",
-                            "candidate (infeasible)": "#55657F",
-                            "baseline": "#F97316",
-                            "optimum": "#22C55E",
-                        },
-                        colors_in_legend=[
-                            "candidate (feasible)",
-                            "candidate (infeasible)",
-                            "baseline",
-                            "optimum",
-                        ],
-                        title="Pareto candidates",
-                        x_title="ΔP at nominal flow (kPa)",
-                        y_title="Worst HBM maximum temperature (°C)",
-                        height=340,
+                    pareto_plot = gr.Image(
+                        label="Pareto candidates",
+                        type="filepath",
+                        interactive=False,
+                        show_label=False,
                     )
                 with gr.Column(scale=2):
-                    optimized_model = gr.Model3D(
-                        label="Optimized cold plate (STL)",
-                        height=420,
-                        clear_color=[0.067, 0.102, 0.18, 1.0],
+                    optimized_model = gr.Image(
+                        label="Optimized cold plate (STL render)",
+                        type="filepath",
+                        interactive=False,
+                        show_label=False,
                     )
                     optimizer_files = gr.File(
                         label="Optimized STEP/STL",

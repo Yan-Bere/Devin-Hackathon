@@ -4,3 +4,4 @@ python-dotenv
 pytest
 scipy
 trimesh
+matplotlib
