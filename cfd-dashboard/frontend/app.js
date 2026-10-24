@@ -472,7 +472,7 @@ async function loadViewer(run) {
   disposeViewer();
   const el = $("viewer");
   const dl = $("modal-download");
-  if (dl) { dl.style.display = run.has_geometry ? "inline-block" : "none"; dl.href = `/api/runs/${encodeURIComponent(run.id)}/geometry`; dl.download = `${run.id}_${(run.details && run.details.role) || "design"}.stl`; }
+  if (dl) { dl.style.display = run.has_geometry ? "block" : "none"; dl.style.width = "fit-content"; dl.href = `/api/runs/${encodeURIComponent(run.id)}/geometry`; dl.download = `${run.id}_${(run.details && run.details.role) || "design"}.stl`; }
   el.innerHTML = "";
   if (!run.has_geometry) { el.textContent = run.details && run.details.source ? "CAD is exported only for the 5 selected designs (diamonds on the Pareto plot) — pick one of those to see its 3D geometry." : "No CAD geometry for this run"; return; }
   el.textContent = "Loading geometry…";

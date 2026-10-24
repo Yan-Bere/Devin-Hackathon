@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CFD Optimization Monitor</title>
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
   <script type="importmap">
     {
@@ -134,7 +134,7 @@
       <div class="modal-body">
         <div class="viewer-wrap">
           <div id="viewer" class="viewer"></div>
-          <a id="modal-download" class="btn" style="display:none;margin-top:8px" href="#">Download CAD (STL)</a>
+          <a id="modal-download" class="btn" style="display:none;position:relative;z-index:5;clear:both;margin:16px 0 8px;padding:8px 16px;background:#67e8f9;color:#020617;border-radius:6px;font-weight:600;text-decoration:none" href="#">Download CAD (STL)</a>
           <div class="viewer-hint">Drag to rotate &middot; scroll to zoom &middot; right-drag to pan</div>
         </div>
         <div class="details">
@@ -154,6 +154,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=6"></script>
+  <script type="module" src="app.js?v=7"></script>
 </body>
 </html>
