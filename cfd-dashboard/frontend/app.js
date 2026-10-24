@@ -116,7 +116,8 @@ function showToast({ title, body, runId, kind }) {
   el.querySelector('[data-act="dismiss"]').onclick = () => el.remove();
   el.querySelector('[data-act="view"]').onclick = () => { el.remove(); openModal(runId); };
   $("toasts").prepend(el);
-  while ($("toasts").children.length > 4) $("toasts").lastChild.remove();
+  while ($("toasts").children.length > 2) $("toasts").lastChild.remove();
+  setTimeout(() => el.remove(), 4000);
   setTimeout(() => el.remove(), 12000);
 }
 function desktopNotify(title, body, runId) {
@@ -188,6 +189,7 @@ function renderStats() {
 
 let paretoInit = false;
 function renderPareto() {
+  if (sortedRuns().some((r) => r.status === "completed")) $("campaign-overlay")?.classList.add("hidden");
   const runs = sortedRuns();
   const completed = runs.filter((r) => r.status === "completed" && hasMetrics(r));
   const front = completed.filter((r) => r.on_pareto).sort((a, b) => a.metrics.pressure_drop_pa - b.metrics.pressure_drop_pa);

@@ -163,3 +163,7 @@ main { padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 16px
 .campaign-devin a{color:inherit}
 
 .campaign-overlay.hidden, .campaign-bar.hidden { display: none !important; }
+
+.campaign-overlay { pointer-events: none; }
+.toasts { width: 300px; top: 70px; }
+.toast { padding: 8px 12px; opacity: .95; }
