@@ -12,6 +12,7 @@ import agent as intake_agent
 import llm
 import schema
 import state as intake_state
+import ui_style
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,65 +26,17 @@ PARETO_COLUMNS = ["T_hbm_max_C", "delta_p_nominal_kPa", "kind"]
 
 
 def render_checklist(session, presented_group=None):
-    lines = []
-    for group_number, group_name in schema.GROUPS.items():
-        group_fields = [item for item in schema.FIELDS if item.group == group_number]
-        required_fields = [item for item in group_fields if session.is_required(item.id)]
-        done = sum(
-            session.fields[item.id].status in intake_state.DONE
-            for item in required_fields
-        )
-        current = " ← current" if group_number == presented_group else ""
-        lines.append(
-            f"### Group {group_number} — {group_name} "
-            f"({done}/{len(required_fields)}){current}"
-        )
-        for item in group_fields:
-            field_state = session.fields[item.id]
-            if field_state.status == "missing" and not session.is_required(item.id):
-                continue
-            if field_state.status == "user_provided":
-                icon, status = "✅", "user provided"
-                assumption = ""
-            elif field_state.status == "assumption_confirmed":
-                icon, status = "☑️", "assumption confirmed"
-                assumption = " (ASSUMPTION)"
-            elif field_state.status == "default_proposed":
-                icon, status = "🟡", "proposed"
-                assumption = " (ASSUMPTION)" if item.is_assumption else ""
-            elif field_state.status == "not_applicable":
-                icon, status = "➖", "not applicable"
-                assumption = ""
-            else:
-                icon, status = "⬜", "missing"
-                assumption = " (ASSUMPTION)" if item.is_assumption else ""
-            display = session._display_value(item, field_state)
-            lines.append(
-                f"- {icon} {item.label}: {display}{assumption} — {status}"
-            )
+    return ui_style.checklist_html(session, presented_group, intake_state.DONE)
 
-    lines.append("### Checks")
-    results = sorted(session.checks(), key=lambda result: result.id)
-    if results:
-        icons = {
-            "ok": "✅",
-            "info": "ℹ️",
-            "warning": "⚠️",
-            "error": "❌",
-        }
-        for result in results:
-            acknowledged = (
-                " — acknowledged"
-                if result.level == "warning" and result.acknowledged
-                else ""
-            )
-            lines.append(
-                f"- {icons[result.level]} {result.id}: "
-                f"{result.message}{acknowledged}"
-            )
-    else:
-        lines.append("Checks: not enough data yet")
-    return "\n".join(lines)
+
+def _stage(agent_state):
+    if agent_state is None:
+        return "specs"
+    session = agent_state.session
+    if session.finalized:
+        return "optimize"
+    done, total = session.progress()
+    return "validate" if done >= total else "specs"
 
 
 def download_paths(session):
@@ -135,7 +88,7 @@ def _panel(agent_state, provider_name=None):
     done, total = session.progress()
     badge = "Finalized ✅" if session.finalized else "In progress"
     return (
-        f"**{done}/{total} required fields complete** · {badge}",
+        ui_style.stepper_html(_stage(agent_state), badge),
         render_checklist(session, agent_state.presented_group),
         download_paths(session),
         _footer(agent_state, provider_name),
@@ -143,8 +96,7 @@ def _panel(agent_state, provider_name=None):
 
 
 def _empty_progress():
-    total = sum(schema.is_required(item, {}) for item in schema.FIELDS)
-    return f"**0/{total} required fields complete** · In progress"
+    return ui_style.stepper_html("specs", "In progress")
 
 
 def _chat(chat):
@@ -394,93 +346,104 @@ def on_optimize(agent_state, runner=None):
 
 
 def build_app(provider_name=None):
-    with gr.Blocks(title="Cold Plate Requirements Intake — ITherm 2027") as demo:
-        gr.Markdown(
-            "## Cold Plate Requirements Intake — ITherm 2027\n\n"
-            "Collects and validates the simulation inputs and writes "
-            "`requirements_final.json` for the optimizer stage."
-        )
+    with gr.Blocks(title=ui_style.APP_TITLE) as demo:
+        with gr.Row(elem_classes="cp-header-row"):
+            gr.HTML(ui_style.header_html(), scale=4)
+            footer = gr.Markdown(
+                _footer(None, provider_name),
+                elem_classes="cp-model-pill",
+            )
+        progress = gr.HTML(_empty_progress(), elem_classes="cp-stepper-wrap")
         agent_state = gr.State(None)
-        with gr.Row():
+        with gr.Row(equal_height=False):
             with gr.Column(scale=3):
                 chatbot = gr.Chatbot(
                     value=[{"role": "assistant", "content": intake_agent.OPENING_LINE}],
                     label="Chat",
                     show_label=False,
-                    height=600,
+                    height=620,
+                    elem_classes="cp-chat",
                 )
                 textbox = gr.Textbox(
                     placeholder="Describe your package or answer the bot…",
                     show_label=False,
                     submit_btn=False,
+                    elem_classes="cp-input",
                 )
                 send_button = gr.Button("Send", variant="primary")
-                with gr.Row():
-                    preset_button = gr.Button("Load ITherm 2027 preset")
-                    blank_button = gr.Button("Start blank")
+                with gr.Row(elem_classes="cp-actions"):
+                    preset_button = gr.Button("Load ITherm 2027 preset", variant="primary")
+                    blank_button = gr.Button("Start blank", variant="secondary")
                     optimize_button = gr.Button(
                         "Optimize",
                         variant="primary",
                         interactive=False,
+                        elem_classes="cp-optimize",
                     )
-            with gr.Column(scale=2):
-                progress = gr.Markdown(_empty_progress())
-                checklist = gr.Markdown("Load the preset or send a message to begin.")
                 downloads = gr.File(
                     label="Downloads",
                     file_count="multiple",
                     interactive=False,
+                    elem_classes="cp-downloads",
                 )
-                footer = gr.Markdown(_footer(None, provider_name))
-                gr.Markdown(
-                    "**Reduced-order model (not CFD). Use for design screening only.**"
-                )
-                optimizer_status = gr.Markdown("Finalize requirements to optimize.")
-                optimizer_summary = gr.Markdown()
-                sweep_results = gr.Dataframe(
-                    headers=[
-                        "Flow (L/min)",
-                        "Inlet (°C)",
-                        "ΔP (kPa)",
-                        "ΔP (psi)",
-                        "GPU max (°C)",
-                        "HBM max (°C)",
-                        "Coolant rise (K)",
-                    ],
-                    interactive=False,
-                    label="Operating-point sweep",
-                )
-                pareto_plot = gr.ScatterPlot(
-                    value=pd.DataFrame(columns=PARETO_COLUMNS),
-                    x="delta_p_nominal_kPa",
-                    y="T_hbm_max_C",
-                    color="kind",
-                    color_map={
-                        "candidate (feasible)": "#398439",
-                        "candidate (infeasible)": "#999999",
-                        "baseline": "#d9534f",
-                        "optimum": "#337ab7",
-                    },
-                    colors_in_legend=[
-                        "candidate (feasible)",
-                        "candidate (infeasible)",
-                        "baseline",
-                        "optimum",
-                    ],
-                    title="Pareto candidates",
-                    x_title="ΔP at nominal flow (kPa)",
-                    y_title="Worst HBM maximum temperature (°C)",
-                    height=320,
-                )
-                optimized_model = gr.Model3D(
-                    label="Optimized cold plate (STL)",
-                    height=400,
-                )
-                optimizer_files = gr.File(
-                    label="Optimized STEP/STL",
-                    file_count="multiple",
-                    interactive=False,
-                )
+            with gr.Column(scale=2):
+                checklist = gr.HTML("Load the preset or send a message to begin.")
+        with gr.Column(elem_classes="cp-results"):
+            gr.Markdown(
+                "**Reduced-order model (not CFD). Use for design screening only.**",
+                elem_classes="cp-banner",
+            )
+            optimizer_status = gr.Markdown("Finalize requirements to optimize.")
+            optimizer_summary = gr.Markdown()
+            with gr.Row(equal_height=False):
+                with gr.Column(scale=3):
+                    sweep_results = gr.Dataframe(
+                        headers=[
+                            "Flow (L/min)",
+                            "Inlet (°C)",
+                            "ΔP (kPa)",
+                            "ΔP (psi)",
+                            "GPU max (°C)",
+                            "HBM max (°C)",
+                            "Coolant rise (K)",
+                        ],
+                        interactive=False,
+                        label="Operating-point sweep",
+                    )
+                    pareto_plot = gr.ScatterPlot(
+                        value=pd.DataFrame(columns=PARETO_COLUMNS),
+                        x="delta_p_nominal_kPa",
+                        y="T_hbm_max_C",
+                        color="kind",
+                        color_map={
+                            "candidate (feasible)": "#22D3EE",
+                            "candidate (infeasible)": "#55657F",
+                            "baseline": "#F97316",
+                            "optimum": "#22C55E",
+                        },
+                        colors_in_legend=[
+                            "candidate (feasible)",
+                            "candidate (infeasible)",
+                            "baseline",
+                            "optimum",
+                        ],
+                        title="Pareto candidates",
+                        x_title="ΔP at nominal flow (kPa)",
+                        y_title="Worst HBM maximum temperature (°C)",
+                        height=340,
+                    )
+                with gr.Column(scale=2):
+                    optimized_model = gr.Model3D(
+                        label="Optimized cold plate (STL)",
+                        height=420,
+                        clear_color=[0.067, 0.102, 0.18, 1.0],
+                    )
+                    optimizer_files = gr.File(
+                        label="Optimized STEP/STL",
+                        file_count="multiple",
+                        interactive=False,
+                        elem_classes="cp-downloads",
+                    )
 
         outputs = [
             agent_state,
@@ -566,6 +529,7 @@ def main(argv=None):
     parser.add_argument("--provider", choices=("mock", "gemini"))
     args = parser.parse_args(argv)
     build_app(args.provider).queue().launch(
+        **ui_style.LAUNCH_KWARGS,
         server_name=os.getenv("GRADIO_SERVER_NAME", "127.0.0.1"),
         server_port=int(os.getenv("PORT", "7860")),
     )

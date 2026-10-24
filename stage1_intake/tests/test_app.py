@@ -23,16 +23,12 @@ def test_build_app_constructs_gradio_six_messages_ui():
     demo = app.build_app("mock")
 
     assert isinstance(demo, gr.Blocks)
-    assert demo.title == "Cold Plate Requirements Intake — ITherm 2027"
+    assert demo.title == "Cold Plate Copilot"
     assert any(
-        getattr(component, "value", None)
-        == (
-            "## Cold Plate Requirements Intake — ITherm 2027\n\n"
-            "Collects and validates the simulation inputs and writes "
-            "`requirements_final.json` for the optimizer stage."
-        )
+        getattr(component, "value", None) == app.ui_style.header_html()
         for component in demo.blocks.values()
     )
+    assert "From competition specs to an optimized" in app.ui_style.header_html()
     assert any(
         isinstance(component, gr.ScatterPlot)
         for component in demo.blocks.values()
@@ -55,34 +51,30 @@ def test_preset_checklist_has_group_progress_and_table_display(tmp_path):
 
     for group_number, group_name in schema.GROUPS.items():
         assert f"Group {group_number} — {group_name}" in checklist
-    assert "🟡" in checklist
-    assert "- ✅ C1:" in checklist
-    assert "- ⚠️ C5:" in checklist
-    assert "- ℹ️ C6:" in checklist
-    check_lines = [
-        line
-        for line in checklist.splitlines()
-        if line.startswith(("- ✅ ", "- ℹ️ ", "- ⚠️ ", "- ❌ "))
-    ]
-    assert [line.split(":", 1)[0].split()[-1] for line in check_lines] == [
+    assert "cp-status cp-proposed" in checklist
+    assert 'data-check="C1"' in checklist
+    assert "cp-check-ok" in checklist
+    assert 'cp-check cp-check-warning" data-check="C5"' in checklist
+    assert 'cp-check cp-check-info" data-check="C6"' in checklist
+    import re
+    assert re.findall(r'data-check="(C\d)"', checklist) == [
         f"C{check_id}" for check_id in range(1, 9)
     ]
     assert "10 rows, 1492.8 W" in checklist
-    assert "Group 1 — Limits and scoring (0/" in checklist
-    assert "← current" in checklist
-    assert f"**{done}/{total} required fields complete**" in progress
+    assert "Group 1 — Limits and scoring" in checklist
+    assert "cp-group cp-current" in checklist
+    assert f"{done} / {total} confirmed" in checklist
+    assert "cp-step cp-active" in progress and "Specs" in progress
     assert downloads == [
         str(intake_agent.session.dir / name)
         for name in ("notes.txt", "requirements.json")
     ]
     assert footer == "LLM: mock"
     assert intake_agent.session.acknowledge_warning("C5", "I acknowledge C5.").ok
-    c5_line = next(
-        line
-        for line in app.render_checklist(intake_agent.session).splitlines()
-        if line.startswith("- ⚠️ C5:")
-    )
-    assert c5_line.endswith(" — acknowledged")
+    rendered = app.render_checklist(intake_agent.session)
+    c5_row = rendered[rendered.index('data-check="C5"'):]
+    c5_row = c5_row[: c5_row.index("</div></div>")]
+    assert "— acknowledged" in c5_row
 
 
 def test_checklist_renders_error_icon_and_missing_data_message(tmp_path, monkeypatch):
@@ -99,9 +91,9 @@ def test_checklist_renders_error_icon_and_missing_data_message(tmp_path, monkeyp
     monkeypatch.setattr(session, "checks", lambda: results)
 
     checklist = app.render_checklist(session)
-    assert "- ⚠️ C5: must be acknowledged — acknowledged" in checklist
-    assert "- ❌ C8: must be fixed" in checklist
-    assert checklist.index("- ⚠️ C5:") < checklist.index("- ❌ C8:")
+    assert "must be acknowledged<span class=\"cp-ack\">— acknowledged</span>" in checklist
+    assert 'cp-check-error" data-check="C8"' in checklist and "must be fixed" in checklist
+    assert checklist.index('data-check="C5"') < checklist.index('data-check="C8"')
 
     monkeypatch.setattr(session, "checks", lambda: [])
     assert "Checks: not enough data yet" in app.render_checklist(session)
@@ -122,7 +114,7 @@ def test_preset_then_send_confirms_group_and_updates_chat(tmp_path):
     assert all(update["interactive"] for update in result[6:10])
     assert result[10]["interactive"] is False
     assert updated_agent.session.fields["dp_hard_limit"].status == "user_provided"
-    assert "✅ Pressure-drop hard limit:" in checklist
+    assert "Pressure-drop hard limit" in checklist and "✓ confirmed" in checklist
     assert {"role": "user", "content": "yes"} in updated_chat
     assert updated_chat[-1]["role"] == "assistant"
     assert updated_chat[-1]["content"].strip()
