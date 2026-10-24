@@ -419,6 +419,12 @@ class Session:
         if item.type == "table":
             total = sum(row.get("power_W", 0) for row in (state.value or []))
             return f"{len(state.value)} rows, {total:g} W"
+        if item.type in {"vec2", "vec3"}:
+            values = " × ".join(units.format_value(value, "") for value in state.value)
+            return f"{values} {item.unit}".strip()
+        if item.type == "list" and item.quantity:
+            values = ", ".join(units.format_value(value, "") for value in state.value)
+            return f"{values} {item.unit}".strip()
         if item.type in {"float", "int"}:
             return units.format_value(state.value, item.unit)
         if isinstance(state.value, (dict, list)):

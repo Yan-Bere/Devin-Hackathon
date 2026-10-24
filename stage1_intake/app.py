@@ -57,15 +57,25 @@ def render_checklist(session, presented_group=None):
             )
 
     lines.append("### Checks")
-    failing_checks = [result for result in session.checks() if result.level != "ok"]
-    if failing_checks:
-        for result in failing_checks:
-            acknowledged = " (acknowledged)" if result.acknowledged else ""
+    results = sorted(session.checks(), key=lambda result: result.id)
+    if results:
+        icons = {
+            "ok": "✅",
+            "info": "ℹ️",
+            "warning": "⚠️",
+            "error": "❌",
+        }
+        for result in results:
+            acknowledged = (
+                " — acknowledged"
+                if result.level == "warning" and result.acknowledged
+                else ""
+            )
             lines.append(
-                f"- **{result.level}** — {result.message}{acknowledged}"
+                f"{icons[result.level]} {result.id}: {result.message}{acknowledged}"
             )
     else:
-        lines.append("none failing")
+        lines.append("Checks: not enough data yet")
     return "\n".join(lines)
 
 
@@ -102,7 +112,7 @@ def _footer(agent_state, provider_name=None):
     if name == "mock":
         return "LLM: mock"
     if name == "gemini":
-        return f"LLM: gemini/{os.getenv('LLM_MODEL', 'gemini-3.8-flash')}"
+        return f"LLM: gemini/{os.getenv('LLM_MODEL', 'gemini-3.5-flash')}"
     return f"LLM: {name}"
 
 
@@ -212,6 +222,11 @@ def on_send(text, agent_state, chat, provider_name=None, sessions_dir=None):
 
 def build_app(provider_name=None):
     with gr.Blocks(title="Cold Plate Requirements Intake — ITherm 2027") as demo:
+        gr.Markdown(
+            "## Cold Plate Requirements Intake — ITherm 2027\n\n"
+            "Collects and validates the simulation inputs and writes "
+            "`requirements_final.json` for the optimizer stage."
+        )
         agent_state = gr.State(None)
         with gr.Row():
             with gr.Column(scale=3):

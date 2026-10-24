@@ -2,6 +2,7 @@ import gradio as gr
 
 import agent
 import app
+import checks
 import llm
 import schema
 import state
@@ -22,6 +23,15 @@ def test_build_app_constructs_gradio_six_messages_ui():
 
     assert isinstance(demo, gr.Blocks)
     assert demo.title == "Cold Plate Requirements Intake — ITherm 2027"
+    assert any(
+        getattr(component, "value", None)
+        == (
+            "## Cold Plate Requirements Intake — ITherm 2027\n\n"
+            "Collects and validates the simulation inputs and writes "
+            "`requirements_final.json` for the optimizer stage."
+        )
+        for component in demo.blocks.values()
+    )
 
 
 def test_preset_checklist_has_group_progress_and_table_display(tmp_path):
@@ -32,6 +42,17 @@ def test_preset_checklist_has_group_progress_and_table_display(tmp_path):
     for group_number, group_name in schema.GROUPS.items():
         assert f"Group {group_number} — {group_name}" in checklist
     assert "🟡" in checklist
+    assert "✅ C1:" in checklist
+    assert "⚠️ C5:" in checklist
+    assert "ℹ️ C6:" in checklist
+    check_lines = [
+        line
+        for line in checklist.splitlines()
+        if line.startswith(("✅ ", "ℹ️ ", "⚠️ ", "❌ "))
+    ]
+    assert [line.split(":", 1)[0].split()[-1] for line in check_lines] == [
+        f"C{check_id}" for check_id in range(1, 9)
+    ]
     assert "10 rows, 1492.8 W" in checklist
     assert "Group 1 — Limits and scoring (0/" in checklist
     assert "← current" in checklist
@@ -41,6 +62,34 @@ def test_preset_checklist_has_group_progress_and_table_display(tmp_path):
         for name in ("notes.txt", "requirements.json")
     ]
     assert footer == "LLM: mock"
+    assert intake_agent.session.acknowledge_warning("C5", "I acknowledge C5.").ok
+    c5_line = next(
+        line for line in app.render_checklist(intake_agent.session).splitlines()
+        if line.startswith("⚠️ C5:")
+    )
+    assert c5_line.endswith(" — acknowledged")
+
+
+def test_checklist_renders_error_icon_and_missing_data_message(tmp_path, monkeypatch):
+    session = state.Session(base_dir=tmp_path)
+    results = [
+        checks.CheckResult(id="C8", level="error", message="must be fixed"),
+        checks.CheckResult(
+            id="C5",
+            level="warning",
+            message="must be acknowledged",
+            acknowledged=True,
+        ),
+    ]
+    monkeypatch.setattr(session, "checks", lambda: results)
+
+    checklist = app.render_checklist(session)
+    assert "⚠️ C5: must be acknowledged — acknowledged" in checklist
+    assert "❌ C8: must be fixed" in checklist
+    assert checklist.index("⚠️ C5:") < checklist.index("❌ C8:")
+
+    monkeypatch.setattr(session, "checks", lambda: [])
+    assert "Checks: not enough data yet" in app.render_checklist(session)
 
 
 def test_preset_then_send_confirms_group_and_updates_chat(tmp_path):
@@ -75,6 +124,13 @@ def test_mock_handlers_finalize_and_expose_final_download(tmp_path):
         digest = intake_agent.digest()
         if digest["awaiting_final_confirmation"]:
             message = "yes"
+        elif not digest["presented_fields"] and any(
+            check["id"] == "C5"
+            and check["level"] == "warning"
+            and not check["acknowledged"]
+            for check in digest["failing_checks"]
+        ):
+            message = "yes, acknowledged"
         else:
             missing_enum = next(
                 (

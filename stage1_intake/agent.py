@@ -315,6 +315,25 @@ class Agent:
         summary = self.session.summary_text() if is_complete else None
         if is_complete and not self.session.finalized and summary not in reply:
             reply = f"{reply}\n\n{summary}\n\nIs this correct?"
+        unacknowledged_checks = [
+            result
+            for result in self.session.checks()
+            if result.level in {"warning", "error"} and not result.acknowledged
+        ]
+        if (
+            not self.session.missing_required()
+            and not self.session.finalized
+            and unacknowledged_checks
+        ):
+            for result in unacknowledged_checks:
+                if result.id not in reply:
+                    reply += f"\n\n⚠️ {result.id} ({result.level}): {result.message}"
+            acknowledgement_prompt = (
+                "Warnings need your explicit acknowledgement (or change the inputs); "
+                "errors must be fixed."
+            )
+            if acknowledgement_prompt not in reply:
+                reply += f"\n\n{acknowledgement_prompt}"
         self._summary_shown_last_turn = (
             bool(summary)
             and summary in reply

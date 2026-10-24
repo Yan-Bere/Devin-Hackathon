@@ -37,7 +37,7 @@ class LLMProvider(Protocol):
 class GeminiProvider:
     def __init__(
         self,
-        model=os.getenv("LLM_MODEL", "gemini-3.8-flash"),
+        model=os.getenv("LLM_MODEL", "gemini-3.5-flash"),
         sleep_fn=time.sleep,
         fallback_models=None,
     ):
@@ -51,7 +51,7 @@ class GeminiProvider:
         configured_fallbacks = (
             os.getenv(
                 "LLM_FALLBACK_MODELS",
-                "gemini-3.6-flash,gemini-3.5-flash",
+                "gemini-3.6-flash,gemini-3.8-flash",
             )
             if fallback_models is None
             else ",".join(fallback_models)
@@ -214,6 +214,19 @@ def _yes(message):
     ) is not None
 
 
+def _clear_acknowledgement(message):
+    normalized = re.sub(r"[^a-z]+", " ", message.casefold()).strip()
+    return normalized in {
+        "yes",
+        "ok",
+        "acknowledge",
+        "acknowledged",
+        "fine",
+        "accept",
+        "yes acknowledged",
+    }
+
+
 def _choice_mentions(message, choices):
     normalized_message = message.casefold()
     matched = []
@@ -282,6 +295,24 @@ class MockProvider:
                             id=uuid.uuid4().hex,
                             name="confirm_defaults",
                             args={"field_ids": field_ids, "user_quote": message},
+                        )
+                    )
+            has_proposed_fields = any(
+                item.get("status") == "default_proposed"
+                for item in digest.get("presented_fields", [])
+            )
+            if _clear_acknowledgement(message) and not has_proposed_fields:
+                for check in digest.get("failing_checks", []):
+                    if check.get("level") != "warning" or check.get("acknowledged"):
+                        continue
+                    calls.append(
+                        ToolCall(
+                            id=uuid.uuid4().hex,
+                            name="acknowledge_warning",
+                            args={
+                                "check_id": check["id"],
+                                "user_quote": message,
+                            },
                         )
                     )
             for item in digest.get("next_group_fields", []):

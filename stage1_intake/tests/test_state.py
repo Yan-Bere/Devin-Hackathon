@@ -134,6 +134,7 @@ def test_finalize_incomplete_and_full_happy_path(tmp_path):
         if state.status == "default_proposed"
     ]
     assert session.confirm_defaults(defaults, "I confirm the proposed values").ok
+    assert session.acknowledge_warning("C5", "I acknowledge C5.").ok
     assert session.is_complete()
     assert session.finalize("finalize").ok
     final_document = json.loads((session.dir / "requirements_final.json").read_text())
@@ -141,6 +142,32 @@ def test_finalize_incomplete_and_full_happy_path(tmp_path):
     assert set(final_document["fields"]["dp_hard_limit"]) == {
         "value", "unit", "status", "source_quote", "updated_at", "required", "is_assumption", "group"
     }
+
+
+def test_display_formats_vectors_and_unitful_sweeps(tmp_path):
+    session = new_session(tmp_path)
+    assert session.load_preset(PRESET).ok
+    expected = {
+        "die_region_size": "52.15 × 50.3 mm",
+        "fin_design_space": "52.15 × 52.15 × 2 mm",
+        "base_plate_size": "78 × 78 × 2 mm",
+        "flow_sweep": "1, 1.5, 2, 2.5, 3 L/min",
+        "inlet_temp_sweep": "20, 25, 30, 35 °C",
+    }
+    for field_id, display in expected.items():
+        item = schema.FIELD_BY_ID[field_id]
+        assert session._display_value(item, session.fields[field_id]) == display
+        assert display in session.summary_text()
+
+    item = schema.FIELD_BY_ID["fluid_properties"]
+    assert session._display_value(item, session.fields[item.id]) == json.dumps(
+        session.fields[item.id].value,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    assert session.set_field("required_outputs", [], user_quote="none").ok
+    item = schema.FIELD_BY_ID["required_outputs"]
+    assert session._display_value(item, session.fields[item.id]) == "[]"
 
 
 def test_digest_returns_next_group_and_defaults(tmp_path):

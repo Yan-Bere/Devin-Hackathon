@@ -31,4 +31,6 @@ def test_heat_flux_viscosity_and_incompatible_units():
 def test_parse_quantity():
     assert units.parse_quantity("4 psi") == (4.0, "psi")
     assert units.parse_quantity("27.6") == (27.6, None)
-    assert units.format_value(27.579, "kPa") == "27.58 kPa"
+    assert units.format_value(27.579, "kPa") == "27.579 kPa"
+    assert units.format_value(1492.8, "W") == "1492.8 W"
+    assert units.format_value(12.0, "W") == "12 W"

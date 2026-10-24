@@ -38,7 +38,18 @@ def test_gemini_intake_conversation(tmp_path):
         for _ in range(20):
             if session.finalized:
                 break
-            message = "yes" if intake_agent.awaiting_final_confirmation else "Yes, use those."
+            digest = intake_agent.digest()
+            if digest["awaiting_final_confirmation"]:
+                message = "yes"
+            elif not digest["presented_fields"] and any(
+                check["id"] == "C5"
+                and check["level"] == "warning"
+                and not check["acknowledged"]
+                for check in digest["failing_checks"]
+            ):
+                message = "I acknowledge the C5 coolant-rise warning."
+            else:
+                message = "Yes, use those."
             exchange(message)
     finally:
         notes_path = session.dir / "notes.txt"
@@ -57,7 +68,10 @@ def test_gemini_intake_conversation(tmp_path):
     assert "Yes those limits are right, but over 4 psi is a penalty, not disqualification." in notes
     assert "Use 2 L/min nominal, 30 C inlet, sweep flow only at 30 C." in notes
     assert "Actually make the TIM 0.08 cm2K/W." in notes
+    assert "ACKNOWLEDGE C5" in notes
     final_document = json.loads(
         (session.dir / "requirements_final.json").read_text(encoding="utf-8")
     )
     assert final_document["finalized"] is True
+    c5 = next(check for check in final_document["checks"] if check["id"] == "C5")
+    assert c5["acknowledged"] is True

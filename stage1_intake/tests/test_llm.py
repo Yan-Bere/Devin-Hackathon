@@ -24,7 +24,7 @@ class FakeModels:
         return outcome
 
 
-def _provider(monkeypatch, outcomes, fallback_models="gemini-3.6-flash,gemini-3.5-flash"):
+def _provider(monkeypatch, outcomes, fallback_models="gemini-3.6-flash,gemini-3.8-flash"):
     from google import genai
     from google.genai import types
 
@@ -37,7 +37,7 @@ def _provider(monkeypatch, outcomes, fallback_models="gemini-3.6-flash,gemini-3.
     monkeypatch.setenv("LLM_FALLBACK_MODELS", fallback_models)
     sleeps = []
     provider = llm.GeminiProvider(
-        model="gemini-3.8-flash",
+        model="gemini-3.5-flash",
         sleep_fn=sleeps.append,
     )
     return provider, models, sleeps, types
@@ -75,7 +75,7 @@ def test_gemini_retries_transient_error_with_injectable_backoff(monkeypatch):
     turn = _generate(provider)
 
     assert turn == llm.LLMTurn(text="", tool_calls=[], raw=None)
-    assert [call[0] for call in models.calls] == ["gemini-3.8-flash"] * 4
+    assert [call[0] for call in models.calls] == ["gemini-3.5-flash"] * 4
     assert sleeps == [2, 4, 8]
 
 
@@ -88,10 +88,10 @@ def test_gemini_falls_back_after_primary_retries_and_updates_model(monkeypatch):
     _generate(provider)
 
     assert [call[0] for call in models.calls] == [
-        "gemini-3.8-flash",
-        "gemini-3.8-flash",
-        "gemini-3.8-flash",
-        "gemini-3.8-flash",
+        "gemini-3.5-flash",
+        "gemini-3.5-flash",
+        "gemini-3.5-flash",
+        "gemini-3.5-flash",
         "gemini-3.6-flash",
     ]
     assert sleeps == [2, 4, 8]
@@ -122,7 +122,7 @@ def test_gemini_rebuilds_history_only_for_a_different_model(monkeypatch):
     ]
 
     same_model = provider._content_history(history, "gemini-3.8-flash")
-    other_model = provider._content_history(history, "gemini-3.6-flash")
+    other_model = provider._content_history(history, "gemini-3.5-flash")
 
     assert same_model[0] is raw
     assert other_model[0] is not raw

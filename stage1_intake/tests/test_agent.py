@@ -46,6 +46,9 @@ def _complete_session(tmp_path):
         if field_state.status == "default_proposed"
     ]
     assert session.confirm_defaults(proposed, user_quote="Yes, use these.").ok
+    assert session.acknowledge_warning(
+        "C5", "I acknowledge the C5 coolant-rise warning."
+    ).ok
     assert session.is_complete()
     return session
 
@@ -134,6 +137,10 @@ def test_scripted_happy_path_records_inputs_confirms_groups_and_finalizes(tmp_pa
             tool_calls=[],
         )
 
+    def show_warnings(system, history, digest):
+        assert not digest["complete"]
+        return llm.LLMTurn(text="All requested inputs are recorded.", tool_calls=[])
+
     def finalize(system, history, digest):
         return llm.LLMTurn(
             text="",
@@ -153,7 +160,9 @@ def test_scripted_happy_path_records_inputs_confirms_groups_and_finalizes(tmp_pa
     ]
     for _ in range(4):
         turns.extend([_confirm_current_group, _next_opening])
-    turns.extend([_confirm_current_group, show_summary, finalize, _next_opening])
+    turns.extend(
+        [_confirm_current_group, show_warnings, show_summary, finalize, _next_opening]
+    )
     provider = llm.ScriptedProvider(turns)
     session = state.Session(base_dir=tmp_path)
     intake_agent = agent.Agent(session, provider)
@@ -168,6 +177,13 @@ def test_scripted_happy_path_records_inputs_confirms_groups_and_finalizes(tmp_pa
     intake_agent.handle("Actually make the TIM 0.08 cm2K/W.")
     for _ in range(5):
         summary_reply = intake_agent.handle("Yes, use those.")
+
+    warning_quote = "I acknowledge the C5 coolant-rise warning."
+    assert "⚠️ C5 (warning):" in summary_reply
+    assert "Warnings need your explicit acknowledgement" in summary_reply
+    assert session.summary_text() not in summary_reply
+    assert session.acknowledge_warning("C5", warning_quote).ok
+    summary_reply = intake_agent.handle(warning_quote)
 
     assert intake_agent.digest()["complete"] is True
     assert intake_agent.awaiting_final_confirmation is True
@@ -386,6 +402,13 @@ def test_mock_provider_end_to_end_completes_preset_intake(tmp_path):
         digest = intake_agent.digest()
         if digest["awaiting_final_confirmation"]:
             message = "yes"
+        elif not digest["presented_fields"] and any(
+            check["id"] == "C5"
+            and check["level"] == "warning"
+            and not check["acknowledged"]
+            for check in digest["failing_checks"]
+        ):
+            message = "yes, acknowledged"
         else:
             missing_enum = next(
                 (
@@ -422,7 +445,7 @@ def test_digest_includes_optional_open_fields_and_summary_text(tmp_path):
     assert "Group 1 — Limits and scoring" in summary
     assert "Pressure-drop hard limit:" in summary
     assert "Heat sources: 10 rows, 1492.8 W" in summary
-    assert "Checks: none failing" in summary
+    assert "Checks: C5 (warning):" in summary
 
 
 @pytest.mark.parametrize(
@@ -508,3 +531,59 @@ def test_complete_session_gets_deterministic_summary_and_can_be_finalized(tmp_pa
     intake_agent.handle("yes")
 
     assert session.finalized is True
+
+
+def test_unacknowledged_c5_blocks_finalization_until_explicit_acknowledgement(tmp_path):
+    session = state.Session(base_dir=tmp_path)
+    assert session.load_preset(PRESET).ok
+    assert session.set_field("dp_over_limit_rule", "penalty").ok
+    assert session.set_field("sweep_mode", "full_grid").ok
+    proposed = [
+        field_id
+        for field_id, field_state in session.fields.items()
+        if field_state.status == "default_proposed"
+    ]
+    assert session.confirm_defaults(proposed, user_quote="Yes, use these.").ok
+    assert not session.missing_required()
+    assert not session.is_complete()
+
+    provider = llm.ScriptedProvider(
+        [
+            llm.LLMTurn(text="Inputs are recorded.", tool_calls=[]),
+            llm.LLMTurn(
+                text="",
+                tool_calls=[_tool("finalize", {"user_quote": "yes"})],
+            ),
+            llm.LLMTurn(text="Please acknowledge the C5 warning first.", tool_calls=[]),
+            llm.LLMTurn(
+                text="",
+                tool_calls=[
+                    _tool(
+                        "acknowledge_warning",
+                        {
+                            "check_id": "C5",
+                            "user_quote": "I acknowledge C5.",
+                        },
+                    )
+                ],
+            ),
+            llm.LLMTurn(text="C5 is acknowledged.", tool_calls=[]),
+        ]
+    )
+    intake_agent = agent.Agent(session, provider)
+
+    warning_reply = intake_agent.handle("Please review the inputs.")
+    assert "⚠️ C5 (warning):" in warning_reply
+    assert "Warnings need your explicit acknowledgement" in warning_reply
+    assert session.summary_text() not in warning_reply
+
+    intake_agent.handle("yes")
+    finalize_result = intake_agent.history[-2]["results"][0]["result"]
+    assert finalize_result["ok"] is False
+    assert session.finalized is False
+
+    summary_reply = intake_agent.handle("I acknowledge C5.")
+    c5 = next(result for result in session.checks() if result.id == "C5")
+    assert c5.acknowledged is True
+    assert session.summary_text() in summary_reply
+    assert "Is this correct?" in summary_reply

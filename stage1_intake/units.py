@@ -217,10 +217,10 @@ def parse_quantity(text):
 
 
 def format_value(value, unit):
-    """Format a number to four significant figures for display."""
+    """Format a number to six significant figures for display."""
     try:
         number = float(value)
     except (TypeError, ValueError):
         return str(value)
-    formatted = f"{number:.4g}"
+    formatted = f"{number:.6g}"
     return f"{formatted} {unit}".rstrip()
