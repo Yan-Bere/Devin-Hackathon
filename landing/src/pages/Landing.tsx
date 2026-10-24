@@ -65,7 +65,7 @@ function Eyebrow({ n, children }: { n: string; children: React.ReactNode }) {
   );
 }
 
-export default function Landing({ demoHref = "/demo" }: { demoHref?: string | null }) {
+export default function Landing({ demoHref = "/demo", chatHref = null }: { demoHref?: string | null; chatHref?: string | null }) {
   const reduce = useReducedMotion();
   const [chatNotice, setChatNotice] = useState(false);
   const rise = (delay = 0) =>
@@ -294,13 +294,22 @@ export default function Landing({ demoHref = "/demo" }: { demoHref?: string | nu
             <h2 className="mt-3 font-display text-3xl font-semibold md:text-4xl">Tell the assistant what you're cooling.</h2>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
-            <button
-              type="button"
-              onClick={() => setChatNotice(true)}
-              className="inline-flex items-center gap-2.5 rounded-md bg-cyan-300 px-6 py-3.5 text-lg font-semibold text-slate-950 transition hover:bg-cyan-200"
-            >
-              <MessageSquare className="h-5 w-5" /> Launch chatbot
-            </button>
+            {chatHref ? (
+              <a
+                href={chatHref}
+                className="inline-flex items-center gap-2.5 rounded-md bg-cyan-300 px-6 py-3.5 text-lg font-semibold text-slate-950 transition hover:bg-cyan-200"
+              >
+                <MessageSquare className="h-5 w-5" /> Launch chatbot
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setChatNotice(true)}
+                className="inline-flex items-center gap-2.5 rounded-md bg-cyan-300 px-6 py-3.5 text-lg font-semibold text-slate-950 transition hover:bg-cyan-200"
+              >
+                <MessageSquare className="h-5 w-5" /> Launch chatbot
+              </button>
+            )}
             <p role="status" aria-live="polite" className="h-4 font-mono text-xs text-slate-400">
               {chatNotice ? "Chatbot coming soon." : ""}
             </p>

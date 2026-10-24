@@ -1,0 +1,9 @@
+.git
+.venv
+**/node_modules
+**/__pycache__
+**/.env
+stage1_intake/sessions
+cfd-dashboard/runs_modelling*
+stage3_modelling/runs
+landing

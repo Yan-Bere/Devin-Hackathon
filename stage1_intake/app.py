@@ -1,10 +1,14 @@
 """Gradio UI for requirements intake."""
 
 import argparse
+import base64
 import json
 import os
+import re
+import shutil
 import sys
 import urllib.request
+import zipfile
 from pathlib import Path
 
 import gradio as gr
@@ -26,7 +30,10 @@ SESSIONS_DIR = BASE_DIR / "sessions"
 THINKING = "…thinking"
 DOWNLOAD_NAMES = ("notes.txt", "requirements.json", "requirements_final.json")
 PARETO_COLUMNS = ["T_hbm_max_C", "delta_p_nominal_kPa", "kind"]
+# Server-side API base (POST target) vs the URL the browser opens.
 DASHBOARD_URL = os.getenv("DASHBOARD_URL", "http://127.0.0.1:8000")
+DASHBOARD_BROWSER_URL = os.getenv("DASHBOARD_BROWSER_URL", DASHBOARD_URL)
+UPLOAD_TYPES = [".md", ".pptx", ".ppt", ".txt", ".csv"]
 READY_MSG = ("Requirements finalized — I'm ready for stage 3 modelling. "
              "Click **Open modelling dashboard** to run it.")
 
@@ -145,6 +152,15 @@ def start_modelling(agent_state, opener=None):
             final_path.read_text(encoding="utf-8"))}
     except (OSError, json.JSONDecodeError) as exc:
         return f"Cannot read finalized requirements: {exc}"
+    uploads = getattr(agent_state, "uploads", None) or {}
+    if uploads.get("markdown"):
+        payload["requirements_markdown"] = "\n\n".join(
+            f"## {name}\n\n{text}" for name, text in uploads["markdown"])
+    if uploads.get("reference_files"):
+        payload["reference_files"] = [
+            {"name": path.name,
+             "content_base64": base64.b64encode(path.read_bytes()).decode("ascii")}
+            for path in uploads["reference_files"]]
     url = f"{DASHBOARD_URL}/api/modelling/start"
     request = urllib.request.Request(
         url,
@@ -158,7 +174,40 @@ def start_modelling(agent_state, opener=None):
     except Exception:
         return (f"Dashboard not reachable at {url} — start it with "
                 f"`python run_demo_stack.py`")
-    return f"Modelling started — opening the dashboard at {DASHBOARD_URL}"
+    return f"Modelling started — opening the dashboard at {DASHBOARD_BROWSER_URL}"
+
+
+def extract_pptx(path, media_dir):
+    """Return (slide text, slide count) and save embedded images to media_dir."""
+    def slide_no(name):
+        return int(re.search(r"(\d+)\.xml$", name).group(1))
+
+    with zipfile.ZipFile(path) as z:
+        slides = sorted(
+            (n for n in z.namelist() if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)),
+            key=slide_no)
+        parts = []
+        for name in slides:
+            xml = z.read(name).decode("utf-8", errors="replace")
+            paragraphs = []
+            for para in re.findall(r"<a:p\b.*?</a:p>", xml, flags=re.S):
+                text = "".join(re.findall(r"<a:t>(.*?)</a:t>", para, flags=re.S))
+                if text.strip():
+                    paragraphs.append(_xml_unescape(text))
+            parts.append(f"### Slide {slide_no(name)}\n" + "\n".join(paragraphs))
+        media = [n for n in z.namelist() if n.startswith("ppt/media/")]
+        if media:
+            Path(media_dir).mkdir(parents=True, exist_ok=True)
+            for name in media:
+                (Path(media_dir) / Path(name).name).write_bytes(z.read(name))
+    return "\n\n".join(parts), len(slides)
+
+
+def _xml_unescape(text):
+    for entity, char in (("&lt;", "<"), ("&gt;", ">"), ("&quot;", '"'),
+                         ("&apos;", "'"), ("&amp;", "&")):
+        text = text.replace(entity, char)
+    return text
 
 
 def _append_ready_message(active_agent, final_chat):
@@ -230,6 +279,59 @@ def on_send(text, agent_state, chat, provider_name=None, sessions_dir=None):
     ]
     final_chat = _append_ready_message(active_agent, final_chat)
     yield _outputs(active_agent, final_chat, False, provider_name)
+
+
+def on_upload(files, agent_state, chat, provider_name=None, sessions_dir=None):
+    current_chat = _chat(chat)
+    yield _outputs(agent_state, current_chat, True, provider_name)
+    active_agent = agent_state
+    try:
+        if active_agent is None:
+            session_dir = sessions_dir if sessions_dir is not None else SESSIONS_DIR
+            session = intake_state.Session(base_dir=session_dir)
+            provider = llm.get_provider(
+                provider_name if provider_name is not None else os.getenv("LLM_PROVIDER")
+            )
+            active_agent = intake_agent.Agent(session, provider)
+            active_agent.start_blank()
+        uploads = getattr(active_agent, "uploads", None)
+        if uploads is None:
+            uploads = active_agent.uploads = {"markdown": [], "reference_files": []}
+        upload_dir = active_agent.session.dir / "uploads"
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        for item in files or []:
+            src = Path(item if isinstance(item, (str, Path)) else item.name)
+            name, ext = src.name, src.suffix.lower()
+            if ext == ".ppt":
+                current_chat.append({"role": "assistant", "content":
+                                     f"{name}: Please save as .pptx"})
+                continue
+            if ext not in UPLOAD_TYPES:
+                current_chat.append({"role": "assistant", "content":
+                                     f"{name}: unsupported file type"})
+                continue
+            dest = upload_dir / name
+            shutil.copyfile(src, dest)
+            if ext == ".csv":
+                uploads["reference_files"].append(dest)
+                current_chat.append({"role": "user", "content":
+                                     f"Uploaded {name} (reference file)"})
+                continue
+            if ext == ".pptx":
+                text, n_slides = extract_pptx(dest, upload_dir / f"{dest.stem}_media")
+                label = f"Uploaded {name} ({n_slides} slides)"
+            else:
+                text = dest.read_text(encoding="utf-8", errors="replace")
+                label = f"Uploaded {name}"
+            uploads["markdown"].append((name, text))
+            current_chat.append({"role": "user", "content": label})
+            current_chat.append({"role": "assistant",
+                                 "content": active_agent.handle(text)})
+    except Exception as exc:
+        current_chat.append({"role": "assistant",
+                             "content": f"Something went wrong: {exc}"})
+    current_chat = _append_ready_message(active_agent, current_chat)
+    yield _outputs(active_agent, current_chat, False, provider_name)
 
 
 def _run_optimizer(requirements_path):
@@ -425,7 +527,13 @@ def build_app(provider_name=None):
                     submit_btn=False,
                     elem_classes="cp-input",
                 )
-                send_button = gr.Button("Send", variant="primary")
+                with gr.Row():
+                    send_button = gr.Button("Send", variant="primary")
+                    upload_button = gr.UploadButton(
+                        "Upload files",
+                        file_types=UPLOAD_TYPES,
+                        file_count="multiple",
+                    )
                 with gr.Row(elem_classes="cp-actions"):
                     preset_button = gr.Button("Load ITherm 2027 preset", variant="primary")
                     blank_button = gr.Button("Start blank", variant="secondary")
@@ -540,6 +648,21 @@ def build_app(provider_name=None):
                 SESSIONS_DIR,
             )
 
+        def upload_handler(files, current_agent, current_chat):
+            yield from on_upload(
+                files,
+                current_agent,
+                current_chat,
+                provider_name,
+                SESSIONS_DIR,
+            )
+
+        upload_button.upload(
+            upload_handler,
+            inputs=[upload_button, agent_state, chatbot],
+            outputs=outputs,
+        )
+
         def optimize_handler(current_agent):
             yield from on_optimize(current_agent)
 
@@ -572,7 +695,7 @@ def build_app(provider_name=None):
             fn=start_modelling,
             inputs=[agent_state],
             outputs=[optimizer_status],
-            js=f"() => {{ window.open('{DASHBOARD_URL}', '_blank'); }}",
+            js=f"() => {{ window.open('{DASHBOARD_BROWSER_URL}', '_blank'); }}",
         )
     return demo
 
