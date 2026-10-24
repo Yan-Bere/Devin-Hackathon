@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CFD Optimization Monitor</title>
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
   <script type="importmap">
     {
@@ -64,7 +64,6 @@
       <div class="card card-pareto">
         <div class="card-head">
           <h2>Pareto front</h2>
-          <button id="download-cad" class="btn btn-ghost" type="button" title="Download the STL of every design that has CAD">Download CAD (selected designs)</button>
           <span class="hint">Click a point for details</span>
         </div>
         <div id="pareto-plot" class="plot"></div>
@@ -135,6 +134,7 @@
       <div class="modal-body">
         <div class="viewer-wrap">
           <div id="viewer" class="viewer"></div>
+          <a id="modal-download" class="btn" style="display:none;margin-top:8px" href="#">Download CAD (STL)</a>
           <div class="viewer-hint">Drag to rotate &middot; scroll to zoom &middot; right-drag to pan</div>
         </div>
         <div class="details">
@@ -154,6 +154,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=5"></script>
+  <script type="module" src="app.js?v=6"></script>
 </body>
 </html>
