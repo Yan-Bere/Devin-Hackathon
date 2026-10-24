@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 
 LABEL = "Low-fidelity reduced-order estimate — not validated CFD"
@@ -16,7 +17,16 @@ def atomic_write(path: Path, data: bytes):
     try:
         with os.fdopen(fd, "wb") as f:
             f.write(data)
-        os.replace(tmp, path)
+        # Windows refuses to replace a file another thread is reading (the dashboard
+        # poller); retry briefly instead of failing the campaign.
+        for attempt in range(80):
+            try:
+                os.replace(tmp, path)
+                break
+            except PermissionError:
+                if attempt == 79:
+                    raise
+                time.sleep(0.025)
     except BaseException:
         try: os.unlink(tmp)
         except OSError: pass
