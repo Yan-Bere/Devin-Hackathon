@@ -418,7 +418,7 @@ class Session:
             return "NOT APPLICABLE"
         if item.type == "table":
             total = sum(row.get("power_W", 0) for row in (state.value or []))
-            return f"{len(state.value)} rows, {units.format_value(total, 'W')}"
+            return f"{len(state.value)} rows, {total:g} W"
         if item.type in {"float", "int"}:
             return units.format_value(state.value, item.unit)
         if isinstance(state.value, (dict, list)):
@@ -439,9 +439,6 @@ class Session:
                 state = self.fields[item.id]
                 assumption = " (ASSUMPTION)" if item.is_assumption else ""
                 display = self._display_value(item, state)
-                if item.type == "table":
-                    total = sum(row.get("power_W", 0) for row in (state.value or []))
-                    display = f"{len(state.value)} rows, {total:g} W"
                 lines.append(
                     f"  {item.label}: {display}{assumption} [{state.status}]"
                 )

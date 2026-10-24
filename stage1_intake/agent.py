@@ -14,6 +14,10 @@ import units
 BASE_DIR = Path(__file__).resolve().parent
 PRESET_PATH = BASE_DIR / "presets" / "itherm2027.json"
 SESSIONS_DIR = BASE_DIR / "sessions"
+OPENING_LINE = (
+    "Hi! I'll collect everything needed to simulate your cold plate. Start by describing your package, "
+    "or load the ITherm 2027 preset and I'll walk you through confirming it."
+)
 
 SYSTEM_PROMPT = """You are the requirements-intake assistant for a liquid cold plate design study (ITherm 2027 package: 2 GPUs + 8 HBM stacks). Your only job is to collect and confirm the inputs listed in the STATE DIGEST. You do not design, simulate, or optimize anything.
 
@@ -523,10 +527,7 @@ def main(argv=None):
     parser.add_argument("--provider", choices=("mock", "gemini"))
     parser.add_argument("--preset", action="store_true")
     args = parser.parse_args(argv)
-    print(
-        "Hi! I'll collect everything needed to simulate your cold plate. Start by describing your package, "
-        "or load the ITherm 2027 preset and I'll walk you through confirming it."
-    )
+    print(OPENING_LINE)
     session = intake_state.Session(base_dir=SESSIONS_DIR)
     provider = llm.get_provider(args.provider)
     agent = Agent(session, provider)
