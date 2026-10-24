@@ -160,14 +160,38 @@ def test_display_formats_vectors_and_unitful_sweeps(tmp_path):
         assert display in session.summary_text()
 
     item = schema.FIELD_BY_ID["fluid_properties"]
-    assert session._display_value(item, session.fields[item.id]) == json.dumps(
-        session.fields[item.id].value,
-        ensure_ascii=False,
-        separators=(",", ":"),
+    assert session._display_value(item, session.fields[item.id]) == (
+        "rho: 997, cp: 4180, mu: 0.000797, k: 0.615"
     )
     assert session.set_field("required_outputs", [], user_quote="none").ok
     item = schema.FIELD_BY_ID["required_outputs"]
-    assert session._display_value(item, session.fields[item.id]) == "[]"
+    assert session._display_value(item, session.fields[item.id]) == ""
+
+
+def test_display_formats_dicts_and_string_lists_without_mutating_requirements(tmp_path):
+    session = new_session(tmp_path)
+    assert session.load_preset(PRESET).ok
+    requirements_path = session.dir / "requirements.json"
+    requirements_before = requirements_path.read_text(encoding="utf-8")
+    expected = {
+        "base_material": "name: copper C110, k: 391",
+        "gasket": (
+            "material: silicone, thickness: 3, "
+            "notes: seals top of fins so flow can't bypass"
+        ),
+        "fluid_properties": "rho: 997, cp: 4180, mu: 0.000797, k: 0.615",
+        "design_families": "straight_fins, staggered_pins",
+    }
+
+    for field_id, display in expected.items():
+        item = schema.FIELD_BY_ID[field_id]
+        assert session._display_value(item, session.fields[field_id]) == display
+
+    assert requirements_path.read_text(encoding="utf-8") == requirements_before
+    assert session.fields["base_material"].value == {
+        "name": "copper C110",
+        "k": 391,
+    }
 
 
 def test_digest_returns_next_group_and_defaults(tmp_path):

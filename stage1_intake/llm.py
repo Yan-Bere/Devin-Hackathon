@@ -37,7 +37,7 @@ class LLMProvider(Protocol):
 class GeminiProvider:
     def __init__(
         self,
-        model=os.getenv("LLM_MODEL", "gemini-3.5-flash"),
+        model=os.getenv("LLM_MODEL", "gemini-3.8-flash"),
         sleep_fn=time.sleep,
         fallback_models=None,
     ):
@@ -51,7 +51,7 @@ class GeminiProvider:
         configured_fallbacks = (
             os.getenv(
                 "LLM_FALLBACK_MODELS",
-                "gemini-3.6-flash,gemini-3.8-flash",
+                "gemini-3.6-flash,gemini-3.5-flash",
             )
             if fallback_models is None
             else ",".join(fallback_models)
@@ -261,6 +261,7 @@ def render_group(digest):
         if item.get("is_assumption"):
             display += " (ASSUMPTION)"
         lines.append(f"- {item['label']}: {display}")
+    lines.append("")
     lines.append("Use these?")
     return "\n".join(lines)
 

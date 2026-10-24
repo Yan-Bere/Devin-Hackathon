@@ -24,7 +24,7 @@ class FakeModels:
         return outcome
 
 
-def _provider(monkeypatch, outcomes, fallback_models="gemini-3.6-flash,gemini-3.8-flash"):
+def _provider(monkeypatch, outcomes, fallback_models="gemini-3.6-flash,gemini-3.5-flash"):
     from google import genai
     from google.genai import types
 
@@ -37,7 +37,7 @@ def _provider(monkeypatch, outcomes, fallback_models="gemini-3.6-flash,gemini-3.
     monkeypatch.setenv("LLM_FALLBACK_MODELS", fallback_models)
     sleeps = []
     provider = llm.GeminiProvider(
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         sleep_fn=sleeps.append,
     )
     return provider, models, sleeps, types
@@ -66,6 +66,29 @@ def _success():
     return SimpleNamespace(candidates=[])
 
 
+def test_mock_group_prompt_separates_confirmation_from_bullet_list():
+    turn = llm.MockProvider().generate(
+        system="",
+        history=[{"role": "tool"}],
+        tools=[],
+        digest={
+            "next_group": 1,
+            "next_group_name": "Limits and scoring",
+            "next_group_fields": [
+                {
+                    "label": "HBM figure-of-merit weight",
+                    "value_display": "0.7",
+                    "status": "default_proposed",
+                }
+            ],
+        },
+    )
+
+    assert turn.text.endswith(
+        "- HBM figure-of-merit weight: 0.7\n\nUse these?"
+    )
+
+
 def test_gemini_retries_transient_error_with_injectable_backoff(monkeypatch):
     provider, models, sleeps, _ = _provider(
         monkeypatch,
@@ -75,7 +98,7 @@ def test_gemini_retries_transient_error_with_injectable_backoff(monkeypatch):
     turn = _generate(provider)
 
     assert turn == llm.LLMTurn(text="", tool_calls=[], raw=None)
-    assert [call[0] for call in models.calls] == ["gemini-3.5-flash"] * 4
+    assert [call[0] for call in models.calls] == ["gemini-3.8-flash"] * 4
     assert sleeps == [2, 4, 8]
 
 
@@ -88,10 +111,10 @@ def test_gemini_falls_back_after_primary_retries_and_updates_model(monkeypatch):
     _generate(provider)
 
     assert [call[0] for call in models.calls] == [
-        "gemini-3.5-flash",
-        "gemini-3.5-flash",
-        "gemini-3.5-flash",
-        "gemini-3.5-flash",
+        "gemini-3.8-flash",
+        "gemini-3.8-flash",
+        "gemini-3.8-flash",
+        "gemini-3.8-flash",
         "gemini-3.6-flash",
     ]
     assert sleeps == [2, 4, 8]

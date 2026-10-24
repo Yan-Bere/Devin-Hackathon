@@ -411,6 +411,19 @@ class Session:
             "files": self.files,
         }
 
+    @staticmethod
+    def _display_component(value):
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return units.format_value(value, "")
+        if isinstance(value, dict):
+            return ", ".join(
+                f"{key}: {Session._display_component(nested_value)}"
+                for key, nested_value in value.items()
+            )
+        if isinstance(value, list):
+            return ", ".join(Session._display_component(item) for item in value)
+        return str(value)
+
     def _display_value(self, item, state):
         if state.status == "missing":
             return "MISSING"
@@ -427,8 +440,15 @@ class Session:
             return f"{values} {item.unit}".strip()
         if item.type in {"float", "int"}:
             return units.format_value(state.value, item.unit)
-        if isinstance(state.value, (dict, list)):
-            return json.dumps(state.value, ensure_ascii=False, separators=(",", ":"))
+        if isinstance(state.value, dict):
+            return ", ".join(
+                f"{key}: {self._display_component(value)}"
+                for key, value in state.value.items()
+            )
+        if isinstance(state.value, list):
+            return ", ".join(
+                self._display_component(value) for value in state.value
+            )
         return str(state.value)
 
     def summary_text(self):

@@ -42,13 +42,13 @@ def test_preset_checklist_has_group_progress_and_table_display(tmp_path):
     for group_number, group_name in schema.GROUPS.items():
         assert f"Group {group_number} — {group_name}" in checklist
     assert "🟡" in checklist
-    assert "✅ C1:" in checklist
-    assert "⚠️ C5:" in checklist
-    assert "ℹ️ C6:" in checklist
+    assert "- ✅ C1:" in checklist
+    assert "- ⚠️ C5:" in checklist
+    assert "- ℹ️ C6:" in checklist
     check_lines = [
         line
         for line in checklist.splitlines()
-        if line.startswith(("✅ ", "ℹ️ ", "⚠️ ", "❌ "))
+        if line.startswith(("- ✅ ", "- ℹ️ ", "- ⚠️ ", "- ❌ "))
     ]
     assert [line.split(":", 1)[0].split()[-1] for line in check_lines] == [
         f"C{check_id}" for check_id in range(1, 9)
@@ -64,8 +64,9 @@ def test_preset_checklist_has_group_progress_and_table_display(tmp_path):
     assert footer == "LLM: mock"
     assert intake_agent.session.acknowledge_warning("C5", "I acknowledge C5.").ok
     c5_line = next(
-        line for line in app.render_checklist(intake_agent.session).splitlines()
-        if line.startswith("⚠️ C5:")
+        line
+        for line in app.render_checklist(intake_agent.session).splitlines()
+        if line.startswith("- ⚠️ C5:")
     )
     assert c5_line.endswith(" — acknowledged")
 
@@ -84,9 +85,9 @@ def test_checklist_renders_error_icon_and_missing_data_message(tmp_path, monkeyp
     monkeypatch.setattr(session, "checks", lambda: results)
 
     checklist = app.render_checklist(session)
-    assert "⚠️ C5: must be acknowledged — acknowledged" in checklist
-    assert "❌ C8: must be fixed" in checklist
-    assert checklist.index("⚠️ C5:") < checklist.index("❌ C8:")
+    assert "- ⚠️ C5: must be acknowledged — acknowledged" in checklist
+    assert "- ❌ C8: must be fixed" in checklist
+    assert checklist.index("- ⚠️ C5:") < checklist.index("- ❌ C8:")
 
     monkeypatch.setattr(session, "checks", lambda: [])
     assert "Checks: not enough data yet" in app.render_checklist(session)

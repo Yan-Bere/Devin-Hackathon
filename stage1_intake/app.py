@@ -72,7 +72,8 @@ def render_checklist(session, presented_group=None):
                 else ""
             )
             lines.append(
-                f"{icons[result.level]} {result.id}: {result.message}{acknowledged}"
+                f"- {icons[result.level]} {result.id}: "
+                f"{result.message}{acknowledged}"
             )
     else:
         lines.append("Checks: not enough data yet")
@@ -112,7 +113,7 @@ def _footer(agent_state, provider_name=None):
     if name == "mock":
         return "LLM: mock"
     if name == "gemini":
-        return f"LLM: gemini/{os.getenv('LLM_MODEL', 'gemini-3.5-flash')}"
+        return f"LLM: gemini/{os.getenv('LLM_MODEL', 'gemini-3.8-flash')}"
     return f"LLM: {name}"
 
 
