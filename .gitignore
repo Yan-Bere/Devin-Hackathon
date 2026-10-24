@@ -22,3 +22,6 @@ frontend/dist/
 cfd-dashboard/runs_modelling/
 cfd-dashboard/runs_modelling_archive/
 stage3_modelling/frontend/dist/
+
+runs_landing/
+landing/dist-standalone/

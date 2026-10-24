@@ -325,8 +325,11 @@ def on_upload(files, agent_state, chat, provider_name=None, sessions_dir=None):
                 label = f"Uploaded {name}"
             uploads["markdown"].append((name, text))
             current_chat.append({"role": "user", "content": label})
+            # The full text goes to the modelling run; the chat agent only gets a short excerpt,
+            # because a whole deck in one turn makes the LLM tool loop very slow.
+            excerpt = text if len(text) <= 4000 else text[:4000] + "\n[... truncated; full file attached to the modelling run]"
             current_chat.append({"role": "assistant",
-                                 "content": active_agent.handle(text)})
+                                 "content": active_agent.handle(f"Uploaded file {name}:\n{excerpt}")})
     except Exception as exc:
         current_chat.append({"role": "assistant",
                              "content": f"Something went wrong: {exc}"})

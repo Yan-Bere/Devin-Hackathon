@@ -459,7 +459,7 @@ async function loadViewer(run) {
   disposeViewer();
   const el = $("viewer");
   el.innerHTML = "";
-  if (!run.has_geometry) { el.textContent = "No CAD geometry for this run"; return; }
+  if (!run.has_geometry) { el.textContent = run.details && run.details.source ? "CAD is exported only for the 5 selected designs (diamonds on the Pareto plot) — pick one of those to see its 3D geometry." : "No CAD geometry for this run"; return; }
   el.textContent = "Loading geometry…";
   let buf;
   try {
