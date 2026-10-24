@@ -147,16 +147,30 @@ def _c6(v):
 
 def _c7(v):
     props, power, flows, inlets = _props(v), _power(v), _flows(v), _inlets(v)
-    hbm, margin = v.get("hbm_tmax_limit"), v.get("temp_safety_margin")
-    if props is None or power is None or not flows or not inlets or not _num(hbm) or not _num(margin):
+    gpu, hbm, margin = v.get("gpu_tmax_limit"), v.get("hbm_tmax_limit"), v.get("temp_safety_margin")
+    if props is None or power is None or not flows or not inlets or not _num(margin):
         return None
+    if v.get("flow_configuration") == "split_flow_edges_to_center":
+        if not _num(gpu):
+            return None
+        limit, basis = gpu, "GPU limit (GPUs sit at the center outlet)"
+    else:
+        known = [(x, name) for x, name in ((gpu, "GPU"), (hbm, "HBM")) if _num(x)]
+        if not known:
+            return None
+        limit, name = min(known)
+        basis = f"{name} limit (lower of GPU/HBM)"
     t_in, q = max(inlets), min(flows)
     t_out = t_in + _bulk_rise(power, q, props)
-    threshold = hbm - margin
+    threshold = limit - margin
     headroom = threshold - t_out
+    point = f"({t_in:g} °C inlet, {q:g} L/min)"
+    if headroom < -TOL:
+        return CheckResult("C7", "warning", f"At the worst point {point} the coolant outlet of {t_out:.1f} °C exceeds the {basis} minus margin ({threshold:g} °C) by {-headroom:.1f} K; this point is infeasible for any design.")
     if headroom < C7_MIN_HEADROOM - TOL:
-        return CheckResult("C7", "warning", f"At the worst point ({t_in:g} °C inlet, {q:g} L/min) the coolant outlet reaches {t_out:.1f} °C, leaving only {headroom:.1f} K of headroom below the HBM limit minus margin ({threshold:g} °C). The chip runs hotter than the coolant, so under {C7_MIN_HEADROOM:g} K of headroom this point is likely infeasible.")
-    return CheckResult("C7", "ok", f"Worst-point coolant outlet {t_out:.1f} °C leaves {headroom:.1f} K of headroom below {threshold:g} °C ({t_in:g} °C inlet, {q:g} L/min).")
+        return CheckResult("C7", "warning", f"At the worst point {point} the coolant outlet reaches {t_out:.1f} °C, leaving only {headroom:.1f} K of headroom below the {basis} minus margin ({threshold:g} °C). The chip runs hotter than the coolant, so under {C7_MIN_HEADROOM:g} K of headroom this point is likely infeasible.")
+    return CheckResult("C7", "ok", f"Worst-point coolant outlet {t_out:.1f} °C leaves {headroom:.1f} K of headroom below the {basis} minus margin ({threshold:g} °C) {point}.")
+
 
 def _c8(v):
     rows = _sources(v)

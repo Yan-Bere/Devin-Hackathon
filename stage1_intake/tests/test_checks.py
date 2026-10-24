@@ -16,16 +16,16 @@ def test_preset_defaults_have_expected_check_levels_and_messages():
     values = _values()
     results = {result.id: result for result in checks.run_checks(values)}
 
-    for check_id in ("C1", "C2", "C3", "C4", "C8"):
+    for check_id in ("C1", "C2", "C3", "C4", "C7", "C8"):
         assert results[check_id].level == "ok"
     assert results["C5"].level == "warning"
     assert "1 L/min → 21.5 K" in results["C5"].message
     assert "1.5 L/min → 14.3 K" in results["C5"].message
     assert "2 L/min" not in results["C5"].message
     assert results["C6"].level == "info"
-    assert results["C7"].level == "warning"
-    assert "8.5 K of headroom" in results["C7"].message
-    assert "likely infeasible" in results["C7"].message
+    assert results["C7"].level == "ok"
+    assert "38.5 K of headroom" in results["C7"].message
+    assert "GPU limit" in results["C7"].message
 
 
 def test_pressure_rule_resolves_c6():
@@ -79,22 +79,38 @@ def test_feature_limits_and_xy_resolution_are_c4_errors():
     assert _result(values, "C4").level == "ok"
 
 
-def test_c7_inlet_sweep_uses_worst_inlet_unless_flow_sweep_mode():
+def test_c7_split_flow_uses_gpu_limit_and_worst_inlet_unless_flow_sweep_mode():
     values = _values()
-    values["inlet_temp_sweep"] = [45]
+    values["inlet_temp_sweep"] = [70]
     result = _result(values, "C7")
     assert result.level == "warning"
-    assert "66.5" in result.message
+    assert "3.5 K of headroom" in result.message
+    assert "likely infeasible" in result.message
+
+    values["inlet_temp_sweep"] = [80]
+    result = _result(values, "C7")
+    assert result.level == "warning"
+    assert "exceeds the GPU limit" in result.message
+    assert "negative" not in result.message
 
     values["sweep_mode"] = "flow_sweep_at_nominal_temp"
     result = _result(values, "C7")
+    assert result.level == "ok"
+    assert "43.5 K of headroom" in result.message
+
+
+def test_c7_other_flow_configurations_use_lower_limit():
+    values = _values()
+    values["flow_configuration"] = "cross_flow"
+    result = _result(values, "C7")
     assert result.level == "warning"
-    assert "13.5 K of headroom" in result.message
+    assert "8.5 K of headroom" in result.message
+    assert "HBM limit" in result.message
 
     values["flow_sweep"] = [2.0, 3.0]
     result = _result(values, "C7")
     assert result.level == "ok"
-    assert "24.3 K of headroom" in result.message
+    assert "19.3 K of headroom" in result.message
 
 
 def test_c5_respects_maximum_coolant_rise():
