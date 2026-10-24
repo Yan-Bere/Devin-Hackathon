@@ -1,0 +1,18 @@
+{
+  "name": "Dual-GPU AI accelerator package",
+  "outline_mm": [70, 70],
+  "limits": { "dp_psi": 4, "t_gpu_c": 100, "t_hbm_c": 70 },
+  "design_space_mm": [52.15, 52.15, 2],
+  "components": [
+    { "id": "GPU1", "type": "GPU", "size_mm": [26, 30], "power_w": 554.4 },
+    { "id": "GPU2", "type": "GPU", "size_mm": [26, 30], "power_w": 554.4 },
+    { "id": "H1", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H2", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H3", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H4", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H5", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H6", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H7", "type": "HBM", "size_mm": [12, 10], "power_w": 48 },
+    { "id": "H8", "type": "HBM", "size_mm": [12, 10], "power_w": 48 }
+  ]
+}
